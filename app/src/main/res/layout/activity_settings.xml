@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -12,23 +11,25 @@
         android:layout_gravity="top"
         android:orientation="horizontal">
 
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/back"
-        android:layout_gravity="start|center"
-        android:layout_marginStart="4dp"
-        android:layout_marginTop="4dp"
-        android:layout_marginBottom="4dp" />
+        <ImageView
+            android:id="@+id/button_back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/back"
+            android:layout_gravity="start|center"
+            android:layout_marginStart="4dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="4dp"
+            android:foreground="?attr/selectableItemBackground" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="52dp"
-        android:text="@string/button_settings"
-        android:layout_gravity="start|center"
-        android:textColor="@color/icon_black"
-        android:textSize="@dimen/primary_text_size" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="52dp"
+            android:text="@string/button_settings"
+            android:layout_gravity="start|center"
+            android:textColor="@color/icon_black"
+            android:textSize="@dimen/primary_text_size" />
 
     </FrameLayout>
 
@@ -53,7 +54,10 @@
             android:layout_width="56dp"
             android:layout_height="40dp"
             android:layout_gravity="end|center"
-            android:layout_marginEnd="6dp"/>
+            android:layout_marginEnd="6dp"
+            android:checked="false"
+            android:thumbTint="@color/grey"
+            android:trackTint="@color/track_white" />
 
     </FrameLayout>
 
@@ -74,8 +78,8 @@
             android:textSize="@dimen/small_text_size" />
 
         <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="@dimen/icon_layout"
+            android:layout_height="@dimen/icon_layout"
             android:src="@drawable/share"
             android:layout_gravity="end|center"
             android:layout_marginEnd="12dp"/>
@@ -99,8 +103,8 @@
             android:textSize="@dimen/small_text_size" />
 
         <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="@dimen/icon_layout"
+            android:layout_height="@dimen/icon_layout"
             android:src="@drawable/support"
             android:layout_gravity="end|center"
             android:layout_marginEnd="12dp"/>
@@ -124,8 +128,8 @@
             android:textSize="@dimen/small_text_size" />
 
         <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="@dimen/icon_layout"
+            android:layout_height="@dimen/icon_layout"
             android:src="@drawable/right_arrow"
             android:layout_gravity="end|center"
             android:layout_marginEnd="12dp"/>
@@ -134,7 +138,6 @@
 
 
     <LinearLayout
-        style="?android:attr/buttonBarStyle"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_gravity="bottom"
