@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/icon_black">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_gravity="top"
+        android:orientation="horizontal">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:text="@string/button_settings"
+        android:layout_gravity="start|center"
+        android:textColor="@color/white"
+        android:textSize="@dimen/primary_text_size" />
+
+    </FrameLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_gravity="top"
+        android:layout_marginTop="24dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:text="@string/dark_theme"
+            android:layout_gravity="start|center"
+            android:textColor="@color/white"
+            android:textSize="@dimen/small_text_size" />
+
+        <Switch
+            android:layout_width="56dp"
+            android:layout_height="40dp"
+            android:layout_gravity="end|center"
+            android:layout_marginEnd="6dp"
+            android:checked="true"
+            android:thumbTint="@color/bg_blue"
+            android:trackTint="@color/track_blue" />
+
+    </FrameLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_gravity="top"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:text="@string/button_share"
+            android:layout_gravity="start|center"
+            android:textColor="@color/white"
+            android:textSize="@dimen/small_text_size" />
+
+        <ImageView
+            android:layout_width="@dimen/icon_layout"
+            android:layout_height="@dimen/icon_layout"
+            android:layout_gravity="end|center"
+            android:layout_marginEnd="12dp"
+            android:src="@drawable/share"
+            app:tint="@color/white" />
+
+    </FrameLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_gravity="top"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:text="@string/button_support"
+            android:layout_gravity="start|center"
+            android:textColor="@color/white"
+            android:textSize="@dimen/small_text_size" />
+
+        <ImageView
+            android:layout_width="@dimen/icon_layout"
+            android:layout_height="@dimen/icon_layout"
+            android:src="@drawable/support"
+            android:layout_gravity="end|center"
+            app:tint = "@color/white"
+            android:layout_marginEnd="12dp"/>
+
+    </FrameLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_gravity="top"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:text="@string/button_eula"
+            android:layout_gravity="start|center"
+            android:textColor="@color/white"
+            android:textSize="@dimen/small_text_size" />
+
+        <ImageView
+            android:layout_width="@dimen/icon_layout"
+            android:layout_height="@dimen/icon_layout"
+            android:src="@drawable/right_arrow"
+            android:layout_gravity="end|center"
+            app:tint = "@color/white"
+            android:layout_marginEnd="12dp"/>
+
+    </FrameLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_gravity="bottom"
+        android:layout_weight="5"
+        android:orientation="horizontal">
+
+        <!-- Кнопки внизу
+        <Button
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:layout_weight="1"
+            android:backgroundTint="@color/white"
+            android:text="@string/button_search"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"
+            android:textColor="@color/icon_black"
+            android:textSize="@dimen/small_text_size"
+            app:cornerRadius="0dp"
+            app:icon="@drawable/search"
+            app:iconGravity="textTop"
+            app:iconPadding="5dp"
+            app:iconTint="@color/icon_black" />
+
+        <Button
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:layout_weight="1"
+            android:backgroundTint="@color/white"
+            android:text="@string/button_media"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"
+            android:textColor="@color/icon_black"
+            android:textSize="@dimen/small_text_size"
+            app:cornerRadius="0dp"
+            app:icon="@drawable/media"
+            app:iconGravity="textTop"
+            app:iconPadding="4dp"
+            app:iconTint="@color/icon_black" />
+
+        <Button
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:layout_weight="1"
+            android:backgroundTint="@color/white"
+            android:text="@string/button_settings"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"
+            android:textColor="@color/icon_black"
+            android:textSize="@dimen/small_text_size"
+            app:cornerRadius="0dp"
+            app:icon="@drawable/settings"
+            app:iconGravity="textTop"
+            app:iconPadding="0dp"
+            app:iconTint="@color/icon_black" />
+            -->
+    </LinearLayout>
+
+
+</LinearLayout>
