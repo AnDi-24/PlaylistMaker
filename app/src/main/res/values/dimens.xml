@@ -3,4 +3,6 @@
     <dimen name="primary_text_size">22sp</dimen>
     <dimen name="small_text_size">16sp</dimen>
     <dimen name="icon_layout">24dp</dimen>
+    <dimen name="icon_end">12dp</dimen>
+    <dimen name="sixteen_layout">16dp</dimen>
 </resources>

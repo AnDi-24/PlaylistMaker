@@ -2,19 +2,16 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="@color/white">
+    android:orientation="vertical">
 
     <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:layout_gravity="top"
-        android:orientation="horizontal">
+        style="@style/FrameSettings"
+        android:layout_height="80dp"
+        android:layout_weight="0">
 
         <ImageView
             android:id="@+id/button_back"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            style="@style/ImageSettings"
             android:src="@drawable/back"
             android:layout_gravity="start|center"
             android:layout_marginStart="4dp"
@@ -23,126 +20,83 @@
             android:foreground="?attr/selectableItemBackground" />
 
         <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            style="@style/TextSettings"
+            android:fontFamily="@font/ys_display_medium"
             android:layout_marginStart="52dp"
             android:text="@string/button_settings"
-            android:layout_gravity="start|center"
-            android:textColor="@color/icon_black"
             android:textSize="@dimen/primary_text_size" />
 
     </FrameLayout>
 
     <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:layout_gravity="top"
-        android:layout_marginTop="24dp"
-        android:orientation="horizontal">
+        style="@style/FrameSettings"
+        >
 
         <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
+            style="@style/TextSettings"
             android:text="@string/dark_theme"
-            android:layout_gravity="start|center"
-            android:textColor="@color/icon_black"
-            android:textSize="@dimen/small_text_size" />
+             />
 
         <Switch
-            android:layout_width="56dp"
-            android:layout_height="40dp"
-            android:layout_gravity="end|center"
-            android:layout_marginEnd="6dp"
-            android:checked="false"
-            android:thumbTint="@color/grey"
-            android:trackTint="@color/track_white" />
+            style="@style/SwitchSettings"/>
 
     </FrameLayout>
 
     <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:layout_gravity="top"
-        android:orientation="horizontal">
+        style="@style/FrameSettings"
+        android:id="@+id/button_share"
+        >
 
         <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
+            style="@style/TextSettings"
             android:text="@string/button_share"
-            android:layout_gravity="start|center"
-            android:textColor="@color/icon_black"
-            android:textSize="@dimen/small_text_size" />
+             />
 
         <ImageView
-            android:layout_width="@dimen/icon_layout"
-            android:layout_height="@dimen/icon_layout"
-            android:src="@drawable/share"
-            android:layout_gravity="end|center"
-            android:layout_marginEnd="12dp"/>
+            style="@style/ImageSettings"
+            android:src="@drawable/share"/>
 
     </FrameLayout>
 
     <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:layout_gravity="top"
-        android:orientation="horizontal">
+        style="@style/FrameSettings"
+        android:id="@+id/button_support"
+        >
 
         <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
+            style="@style/TextSettings"
             android:text="@string/button_support"
-            android:layout_gravity="start|center"
-            android:textColor="@color/icon_black"
-            android:textSize="@dimen/small_text_size" />
+            />
 
         <ImageView
-            android:layout_width="@dimen/icon_layout"
-            android:layout_height="@dimen/icon_layout"
+            style="@style/ImageSettings"
             android:src="@drawable/support"
-            android:layout_gravity="end|center"
-            android:layout_marginEnd="12dp"/>
+            />
 
     </FrameLayout>
 
     <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:layout_gravity="top"
-        android:orientation="horizontal">
+        android:id="@+id/button_eula"
+        style="@style/FrameSettings"
+        >
 
         <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
+            style="@style/TextSettings"
             android:text="@string/button_eula"
-            android:layout_gravity="start|center"
-            android:textColor="@color/icon_black"
-            android:textSize="@dimen/small_text_size" />
+            />
 
         <ImageView
-            android:layout_width="@dimen/icon_layout"
-            android:layout_height="@dimen/icon_layout"
+            style="@style/ImageSettings"
             android:src="@drawable/right_arrow"
-            android:layout_gravity="end|center"
-            android:layout_marginEnd="12dp"/>
+            />
 
     </FrameLayout>
 
 
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
+        style="@style/FrameSettings"
         android:layout_gravity="bottom"
-        android:layout_weight="5"
-        android:orientation="horizontal">
+        android:layout_weight="5">
 
         <!-- Кнопки внизу
         <Button
