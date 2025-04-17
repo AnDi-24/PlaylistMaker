@@ -1,8 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="primary_text_size">22sp</dimen>
+    <dimen name="rv_small_text_size">11sp</dimen>
     <dimen name="small_text_size">16sp</dimen>
-    <dimen name="icon_layout">24dp</dimen>
+    <dimen name="primary_text_size">22sp</dimen>
     <dimen name="icon_end">12dp</dimen>
+    <dimen name="thirteen">13dp</dimen>
+    <dimen name="fourteen">14dp</dimen>
     <dimen name="sixteen_layout">16dp</dimen>
+    <dimen name="nineteen">19dp</dimen>
+    <dimen name="icon_layout">24dp</dimen>
+    <dimen name="rv_top">34dp</dimen>
+    <dimen name="forty_four">44dp</dimen>
+    <dimen name="album_ic">45dp</dimen>
+    <dimen name="fifty_four">54dp</dimen>
+    <dimen name="height_layout">61dp</dimen>
+    <dimen name="rv_names_start">66dp</dimen>
+    <dimen name="rv_time_start">133dp</dimen>
+    <dimen name="rv_dot_start">120dp</dimen>
+
 </resources>
