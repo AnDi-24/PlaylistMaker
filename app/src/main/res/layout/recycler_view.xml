@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/height_layout"
+    android:background="@android:color/transparent">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/height_layout"
+        android:background="@android:color/transparent">
+
+        <ImageView
+            android:id="@+id/albumIcon"
+            android:layout_width="@dimen/album_ic"
+            android:layout_height="@dimen/album_ic"
+            android:layout_marginStart="@dimen/thirteen"
+            android:backgroundTint="@android:color/transparent"
+            android:layout_gravity="start|center">
+        </ImageView>
+
+        <TextView
+            style="@style/YSFont"
+            android:id="@+id/track"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/nineteen"
+            android:layout_marginStart="@dimen/rv_names_start"
+            android:layout_marginTop="@dimen/fourteen"
+            android:layout_marginEnd="@dimen/forty_four"
+            android:background="@android:color/transparent"
+            tools:text="Smells Like Teen">
+
+        </TextView>
+        
+        <TextView
+            style="@style/rvTimeArtistFont"
+            android:id="@+id/artist"
+            android:layout_width="@dimen/fifty_four"
+            android:layout_height="@dimen/thirteen"
+            android:layout_marginStart="@dimen/rv_names_start"
+            android:layout_marginTop="@dimen/rv_top"
+            android:textSize="@dimen/rv_small_text_size"
+            android:background="@android:color/transparent"
+            tools:text="Smells Like Teen">
+            
+        </TextView>
+        
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/rv_dot_start"
+            android:layout_marginTop="@dimen/rv_top"
+            android:src="@drawable/dot"
+            android:background="@android:color/transparent">
+
+        </ImageView>
+
+        <TextView
+            style="@style/rvTimeArtistFont"
+            android:id="@+id/duration"
+            android:layout_width="@dimen/fifty_four"
+            android:layout_height="@dimen/thirteen"
+            android:layout_marginStart="@dimen/rv_time_start"
+            android:layout_marginTop="@dimen/rv_top"
+            android:textSize="@dimen/rv_small_text_size"
+            android:background="@android:color/transparent"
+            tools:text="5:55">
+
+        </TextView>
+
+        <ImageView
+            style="@style/ImageSettings"
+            android:src="@drawable/right_arrow">
+
+        </ImageView>
+
+    </FrameLayout>
+
+</LinearLayout>
+
