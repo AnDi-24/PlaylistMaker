@@ -99,5 +99,21 @@
         <item name="android:ellipsize">end</item>
     </style>
 
+    <style name="bg">
+        <item name="android:background">@color/bg_blue</item>
+    </style>
+
+    <style name="showMessage">
+        <item name="android:layout_marginTop">@dimen/show_message_top</item>
+        <item name="android:layout_width">@dimen/show_message_width</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">center|top</item>
+        <item name="android:textAlignment">center</item>
+        <item name="android:fontFamily">@font/ys_display_medium</item>
+        <item name="android:textSize">@dimen/medium_text</item>
+        <item name="android:textColor">@color/icon_black</item>
+        <item name="android:textFontWeight">400</item>
+        <item name="android:background">@android:color/transparent</item>
+    </style>
 
 </resources>
