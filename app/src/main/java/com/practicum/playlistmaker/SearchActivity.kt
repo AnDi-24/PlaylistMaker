@@ -38,7 +38,7 @@ class SearchActivity : AppCompatActivity() {
 
     private var inputValue: String = INPUT_DEF
 
-    private val tracks = ArrayList<Track>()
+    private val tracks = mutableListOf<Track>()
 
     private val adapter = TrackAdapter()
 
@@ -157,10 +157,11 @@ class SearchActivity : AppCompatActivity() {
             .enqueue(object : Callback<TracksResponse> {
                 override fun onResponse(call: Call<TracksResponse>,
                                         response: Response<TracksResponse>) {
-                    if (response.code() == 200) {
+                    if (response.isSuccessful) {
+                        val responseResults = response.body()?.results ?: emptyList()
                         tracks.clear()
-                        if (response.body()?.results?.isNotEmpty() == true) {
-                            tracks.addAll(response.body()?.results!!)
+                        if (responseResults.isNotEmpty() == true) {
+                            tracks.addAll(responseResults)
                             adapter.notifyDataSetChanged()
                         }
                         if (tracks.isEmpty()) {
