@@ -37,35 +37,71 @@
         android:layout_width="match_parent"
         android:layout_height="52dp">
 
+
         <EditText
             android:id="@+id/inputEditText"
             style="@style/TextEditSearch"
-            android:hint="@string/button_search" />
+            android:hint="@string/button_search"
+            android:imeOptions="actionDone"
+            android:singleLine="true"/>
 
-        <ImageView style="@style/SearchIc" />
+        <ImageView style="@style/SearchIc"
+            android:layout_marginStart="29dp"
+            android:layout_marginTop="@dimen/nineteen"
+            android:layout_marginBottom="@dimen/nineteen"
+            android:layout_height="@dimen/fourteen"
+            android:layout_width="@dimen/fourteen"/>
 
         <ImageView
             android:id="@+id/clear_icon"
-            android:layout_width="@dimen/icon_end"
-            android:layout_height="@dimen/icon_end"
-            android:layout_marginEnd="28dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
             android:layout_gravity="center|end"
-            android:src="@android:drawable/ic_menu_close_clear_cancel"
+            android:src="@drawable/clear"
             android:backgroundTint="@android:color/transparent"
-            android:visibility="gone"
-            app:tint="@color/grey" />
+            android:visibility="gone"/>
 
     </FrameLayout>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvTrack"
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="21dp"
-        android:background="@android:color/transparent"
-        android:orientation="vertical"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        tools:itemCount="5"
-        tools:listitem="@layout/recycler_view" />
+        android:background="@android:color/transparent">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvTrack"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="21dp"
+            android:background="@android:color/transparent"
+            android:orientation="vertical"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            tools:listitem="@layout/recycler_view" />
+
+        <ImageView
+            android:id="@+id/placeholderNotFound"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center|top"
+            android:layout_marginStart="120dp"
+            android:layout_marginTop="102dp"
+            android:layout_marginEnd="120dp"/>
+
+        <TextView
+            android:id="@+id/placeholderMessage"
+            style="@style/showMessage"/>
+
+        <ImageView
+            android:id="@+id/refreshButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="350dp"
+            android:layout_marginStart="134dp"
+            android:layout_marginEnd="135dp"
+            android:layout_gravity="center|top"
+            android:foreground="?attr/selectableItemBackground" />
+
+    </FrameLayout>
 
 </LinearLayout>

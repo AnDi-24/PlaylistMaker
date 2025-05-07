@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="rv_small_text_size">11sp</dimen>
+    <dimen name="medium_text">19sp</dimen>
     <dimen name="small_text_size">16sp</dimen>
     <dimen name="primary_text_size">22sp</dimen>
     <dimen name="album_corners">2dp</dimen>
@@ -18,5 +19,7 @@
     <dimen name="rv_names_start">66dp</dimen>
     <dimen name="rv_time_start">133dp</dimen>
     <dimen name="rv_dot_start">120dp</dimen>
+    <dimen name="show_message_top">238dp</dimen>
+    <dimen name="show_message_width">312dp</dimen>
 
 </resources>
