@@ -4,7 +4,7 @@
     <solid android:color="@color/track_white"/>
     <corners android:radius="8dp"/>
     <padding
-        android:top="8.5dp"
-        android:left="36dp"
-        android:bottom="8.5dp" />
+        android:top="16.5px"
+        android:bottom="15.5px"
+        android:left="36dp" />
 </shape>
