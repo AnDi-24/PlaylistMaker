@@ -10,6 +10,7 @@ import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -40,12 +41,13 @@ class SearchActivity : AppCompatActivity() {
 
     private val tracks = mutableListOf<Track>()
 
-    private val adapter = TrackAdapter()
+    private val trackAdapter = TrackAdapter()
 
     private lateinit var placeholderMessage: TextView
     private lateinit var placeholderNotFound: ImageView
     private lateinit var refreshButton: ImageView
     private lateinit var inputEditText: EditText
+    private lateinit var historyLog: SearchHistory
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
@@ -57,9 +59,22 @@ class SearchActivity : AppCompatActivity() {
         inputValue = savedInstanceState.getString(INPUT_STATE, INPUT_DEF)
     }
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_search)
+
+        historyAdapter = HistoryAdapter()
+
+        val clearHistoryButton = findViewById<ImageView>(R.id.clearHistoryButton)
+        val foundTrack = findViewById<RecyclerView>(R.id.foundTrack)
+        foundTrack.adapter = historyAdapter
+
+        savedHistory = getSharedPreferences(SEARCH_HISTORY, MODE_PRIVATE)
+
+        historyLog = SearchHistory(this)
+
+        historyLog.doHistory()
 
         inputEditText = findViewById<EditText>(R.id.inputEditText)
         placeholderMessage = findViewById(R.id.placeholderMessage)
@@ -69,10 +84,17 @@ class SearchActivity : AppCompatActivity() {
         val clearButton = findViewById<ImageView>(R.id.clear_icon)
         val inputMethodManager = getSystemService(INPUT_METHOD_SERVICE) as? InputMethodManager
         val rvTrack = findViewById<RecyclerView>(R.id.rvTrack)
+        val historyView = findViewById<LinearLayout>(R.id.historyView)
 
-        adapter.data = tracks
+        clearHistoryButton.setOnClickListener {
+            historyAdapter.savedList.clear()
+            historyAdapter.notifyDataSetChanged()
+            historyView.visibility = View.GONE
+        }
 
-        rvTrack.adapter = adapter
+        trackAdapter.data = tracks
+
+        rvTrack.adapter = trackAdapter
 
         inputEditText.setText(inputValue)
 
@@ -93,7 +115,9 @@ class SearchActivity : AppCompatActivity() {
         clearButton.setOnClickListener {
             inputEditText.setText("")
             tracks.clear()
-            adapter.notifyDataSetChanged()
+            trackAdapter.notifyDataSetChanged()
+            historyAdapter.notifyDataSetChanged()
+            showMessage("", null, "")
             inputMethodManager?.hideSoftInputFromWindow(clearButton.windowToken, 0)
         }
 
@@ -101,12 +125,20 @@ class SearchActivity : AppCompatActivity() {
             finish()
         }
 
+        inputEditText.setOnFocusChangeListener { view, hasFocus ->
+            historyView.visibility =
+                if (hasFocus && inputEditText.text.isEmpty() && !historyAdapter.savedList.isEmpty()) View.VISIBLE else View.GONE
+        }
+
+
         val searchTextWatcher = object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
 
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+
+                historyView.visibility = if (inputEditText.hasFocus() && s?.isEmpty() == true) View.VISIBLE else View.GONE
 
                 clearButton.visibility = clearButtonVisibility(s)
 
@@ -136,7 +168,7 @@ class SearchActivity : AppCompatActivity() {
             placeholderMessage.visibility = View.VISIBLE
             placeholderNotFound.visibility = View.VISIBLE
             tracks.clear()
-            adapter.notifyDataSetChanged()
+            trackAdapter.notifyDataSetChanged()
             placeholderMessage.text = text
             placeholderNotFound.setImageDrawable(icon)
             if (additionalMessage.isNotEmpty()) {
@@ -152,6 +184,11 @@ class SearchActivity : AppCompatActivity() {
         }
     }
 
+    override fun onStop() {
+        super.onStop()
+        historyLog.saveHistory()
+    }
+
     private fun requestState(){
         iTunesService.search(inputEditText.text.toString())
             .enqueue(object : Callback<TracksResponse> {
@@ -162,7 +199,7 @@ class SearchActivity : AppCompatActivity() {
                         tracks.clear()
                         if (responseResults.isNotEmpty() == true) {
                             tracks.addAll(responseResults)
-                            adapter.notifyDataSetChanged()
+                            trackAdapter.notifyDataSetChanged()
                         }
                         if (tracks.isEmpty()) {
                             showMessage(getString(R.string.nothing_found), getDrawable(R.drawable.nothing), "")

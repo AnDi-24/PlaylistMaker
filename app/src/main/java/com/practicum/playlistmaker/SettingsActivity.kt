@@ -6,6 +6,8 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.net.toUri
+import com.google.android.material.switchmaterial.SwitchMaterial
+import androidx.core.content.edit
 
 class SettingsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -15,9 +17,18 @@ class SettingsActivity : AppCompatActivity() {
         val shareButton = findViewById<FrameLayout>(R.id.button_share)
         val supportButton = findViewById<FrameLayout>(R.id.button_support)
         val eulaButton = findViewById<FrameLayout>(R.id.button_eula)
+        val themeSwitcher = findViewById<SwitchMaterial>(R.id.themeSwitcher)
+        themeSharedPrefs = getSharedPreferences(THEME_CUR, MODE_PRIVATE)
 
         backButton.setOnClickListener {
             finish()
+        }
+
+        themeSwitcher.setOnCheckedChangeListener { switcher, checked ->
+            (applicationContext as App).switchTheme(checked)
+            themeSharedPrefs.edit {
+                putBoolean(THEME_KEY, themeSwitcher.isChecked)
+            }
         }
 
         shareButton.setOnClickListener{
