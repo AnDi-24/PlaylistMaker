@@ -54,8 +54,8 @@
         <item name="android:layout_gravity">end|center</item>
         <item name="android:layout_marginEnd">6dp</item>
         <item name="android:checked">true</item>
-        <item name="android:thumbTint">@color/bg_blue</item>
-        <item name="android:trackTint">@color/track_blue</item>
+        <item name="thumbTint">@color/bg_blue</item>
+        <item name="trackTint">@color/track_blue</item>
     </style>
 
     <style name="TextEditSearch">

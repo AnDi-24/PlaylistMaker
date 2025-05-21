@@ -3,8 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="@dimen/height_layout"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="@android:color/transparent">
+    android:background="@android:color/transparent"
+    android:foreground="?attr/selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true">
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -73,8 +75,6 @@
             </TextView>
 
         </LinearLayout>
-        
-
 
         <ImageView
             style="@style/ImageSettings"
