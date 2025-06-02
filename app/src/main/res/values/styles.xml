@@ -33,7 +33,7 @@
     <style name="ImageSettings">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_marginEnd">@dimen/icon_end</item>
+        <item name="android:layout_marginEnd">@dimen/dp_12</item>
         <item name="android:layout_gravity">end|center</item>
         <item name="android:backgroundTint">@color/white</item>
     </style>
@@ -114,6 +114,17 @@
         <item name="android:textColor">@color/icon_black</item>
         <item name="android:textFontWeight">400</item>
         <item name="android:background">@android:color/transparent</item>
+    </style>
+
+    <style name="topBar">
+        <item name="background">@color/white</item>
+    </style>
+
+    <style name="fontPlayer">
+        <item name="android:fontFamily">@font/ys_display_regular</item>
+        <item name="android:textColor">@color/icon_black</item>
+        <item name="android:textFontWeight">400</item>
+        <item name="android:textSize">@dimen/small_text_size_13</item>
     </style>
 
 

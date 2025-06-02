@@ -13,7 +13,7 @@ const val SEARCH_HISTORY_LIST_KEY = "for_search_history_list"
 const val SEARCH_HISTORY_KEY = "for_search_history"
 lateinit var savedHistory: SharedPreferences
 lateinit var listener: OnSharedPreferenceChangeListener
-lateinit var historyAdapter: HistoryAdapter
+lateinit var historyAdapter: TrackAdapter
 
 class SearchHistory(private val context: Context) {
 
@@ -39,8 +39,11 @@ class SearchHistory(private val context: Context) {
         return Gson().toJson(tracks)
     }
 
-    fun doHistory() {
+    private fun createJsonFromTrack(track: Track): String {
+        return Gson().toJson(track)
+    }
 
+    fun doHistory() {
         val tracksH = savedHistory.getString(SEARCH_HISTORY_LIST_KEY, null)
 
         if (tracksH != null) {
@@ -55,21 +58,32 @@ class SearchHistory(private val context: Context) {
                     historyAdapter.savedList.add(0, createTracksFromJson(track))
                     Toast.makeText(context, "Сохранено", Toast.LENGTH_SHORT)
                         .show()
-                    historyAdapter.notifyItemInserted(0)
                     if (historyAdapter.savedList.size > MAX_HISTORY_SIZE) {
                         historyAdapter.savedList.removeAt(MAX_HISTORY_SIZE)
-                        historyAdapter.notifyItemInserted(0)
                     }
+                    historyAdapter.notifyItemInserted(0)
                 }
             }
         }
-        }
+    }
 
-        fun saveHistory() {
-            savedHistory.edit {
-                putString(SEARCH_HISTORY_LIST_KEY, createJsonFromTracksList(historyAdapter.savedList))
+    fun saveHistory() {
+        savedHistory.edit {
+              putString(SEARCH_HISTORY_LIST_KEY, createJsonFromTracksList(historyAdapter.savedList))
             }
+    }
+
+    fun saveTrack(track: Track) {
+        savedHistory.edit {
+            putString(SEARCH_HISTORY_KEY, createJsonFromTrack(track))
+            savedHistory.registerOnSharedPreferenceChangeListener(listener)
         }
+    }
+
+
+
+
+
 
 
 }

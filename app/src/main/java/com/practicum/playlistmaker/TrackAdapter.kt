@@ -1,14 +1,16 @@
 package com.practicum.playlistmaker
 
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import androidx.core.content.edit
 
-class TrackAdapter () : RecyclerView.Adapter<TrackViewHolder> () {
+class TrackAdapter (private val onTrackClick: (Track) -> Unit
+) : RecyclerView.Adapter<TrackViewHolder> () {
 
-    var data = mutableListOf<Track>()
+    var savedList = mutableListOf<Track>()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TrackViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.recycler_view, parent, false)
@@ -16,22 +18,15 @@ class TrackAdapter () : RecyclerView.Adapter<TrackViewHolder> () {
     }
 
     override fun onBindViewHolder(holder: TrackViewHolder, position: Int) {
-
-        val trackPosition = data[position]
+        val trackPosition = savedList[position]
         holder.bind(trackPosition)
         holder.itemView.setOnClickListener {
-            savedHistory.edit {
-                putString(SEARCH_HISTORY_KEY, createJsonFromTrack(trackPosition))
-                savedHistory.registerOnSharedPreferenceChangeListener(listener)
-            }}
-    }
-
-    private fun createJsonFromTrack(track: Track): String {
-        return Gson().toJson(track)
+            onTrackClick.invoke(trackPosition)
+            }
     }
 
     override fun getItemCount(): Int {
-        return data.size
+        return savedList.size
     }
 }
 

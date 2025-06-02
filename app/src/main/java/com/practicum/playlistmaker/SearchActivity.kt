@@ -1,6 +1,7 @@
 package com.practicum.playlistmaker
 
 
+import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.text.Editable
@@ -14,12 +15,15 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.edit
 import androidx.recyclerview.widget.RecyclerView
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+
+lateinit var chosenTrack: Track
 
 class SearchActivity : AppCompatActivity() {
 
@@ -41,13 +45,14 @@ class SearchActivity : AppCompatActivity() {
 
     private val tracks = mutableListOf<Track>()
 
-    private val trackAdapter = TrackAdapter()
+    private lateinit var trackAdapter: TrackAdapter
 
     private lateinit var placeholderMessage: TextView
     private lateinit var placeholderNotFound: ImageView
     private lateinit var refreshButton: ImageView
     private lateinit var inputEditText: EditText
-    private lateinit var historyLog: SearchHistory
+    private lateinit var searchHistory: SearchHistory
+
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
@@ -64,7 +69,18 @@ class SearchActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_search)
 
-        historyAdapter = HistoryAdapter()
+        searchHistory = SearchHistory(this)
+        val playerIntent = Intent(this, PlayerActivity::class.java)
+
+        trackAdapter = TrackAdapter{
+            chosenTrack = it
+            searchHistory.saveTrack(it)
+            startActivity(playerIntent)
+        }
+
+        historyAdapter = TrackAdapter{
+            chosenTrack = it
+            startActivity(playerIntent)}
 
         val clearHistoryButton = findViewById<ImageView>(R.id.clearHistoryButton)
         val foundTrack = findViewById<RecyclerView>(R.id.foundTrack)
@@ -72,9 +88,7 @@ class SearchActivity : AppCompatActivity() {
 
         savedHistory = getSharedPreferences(SEARCH_HISTORY, MODE_PRIVATE)
 
-        historyLog = SearchHistory(this)
-
-        historyLog.doHistory()
+        searchHistory.doHistory()
 
         inputEditText = findViewById<EditText>(R.id.inputEditText)
         placeholderMessage = findViewById(R.id.placeholderMessage)
@@ -92,7 +106,7 @@ class SearchActivity : AppCompatActivity() {
             historyView.visibility = View.GONE
         }
 
-        trackAdapter.data = tracks
+        trackAdapter.savedList = tracks
 
         rvTrack.adapter = trackAdapter
 
@@ -186,7 +200,7 @@ class SearchActivity : AppCompatActivity() {
 
     override fun onStop() {
         super.onStop()
-        historyLog.saveHistory()
+        searchHistory.saveHistory()
     }
 
     private fun requestState(){
