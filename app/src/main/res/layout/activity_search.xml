@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:fitsSystemWindows="true"
     style="@style/FrameSettings">
 
     <FrameLayout
@@ -69,15 +70,57 @@
         android:layout_height="match_parent"
         android:background="@android:color/transparent">
 
+        <LinearLayout
+            android:id="@+id/historyView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                style="@style/showMessage"
+                android:layout_width="match_parent"
+                android:layout_marginTop="18dp"
+                android:layout_marginBottom="20dp"
+                android:textSize="@dimen/medium_text"
+                android:layout_height="22dp"
+                android:textFontWeight="500"
+                android:text="@string/searched" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/foundTrack"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:layout_marginTop="8dp"
+                android:background="@android:color/transparent"
+                android:orientation="vertical"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:itemCount="10"
+                tools:listitem="@layout/recycler_view" />
+
+            <ImageView
+                android:id="@+id/clearHistoryButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center|top"
+                android:layout_marginTop="@dimen/icon_layout"
+                android:layout_marginBottom="@dimen/icon_end"
+                android:src="@drawable/clear_search_history" />
+
+
+        </LinearLayout>
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvTrack"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_marginTop="21dp"
             android:background="@android:color/transparent"
             android:orientation="vertical"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-            tools:listitem="@layout/recycler_view" />
+            tools:listitem="@layout/recycler_view"/>
 
         <ImageView
             android:id="@+id/placeholderNotFound"
