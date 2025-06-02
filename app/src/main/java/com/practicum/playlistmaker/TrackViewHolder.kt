@@ -15,7 +15,7 @@ class TrackViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
     private val track: TextView = itemView.findViewById(R.id.track)
     private val artist: TextView = itemView.findViewById(R.id.artist)
     private val duration: TextView = itemView.findViewById(R.id.duration)
-    private val radius = itemView.context.resources.getDimensionPixelSize(R.dimen.album_corners)
+    private val radius = itemView.context.resources.getDimensionPixelSize(R.dimen.dp_2)
     private val formatter = SimpleDateFormat("mm:ss", Locale.getDefault())
 
 
