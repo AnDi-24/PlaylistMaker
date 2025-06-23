@@ -26,6 +26,8 @@
     <string name="cover">Обложка</string>
     <string name="like">Нравится</string>
     <string name="play">Воспроизведение</string>
+    <string name="pause">Пауза</string>
     <string name="add">Сохранить</string>
+    <string name="time_example">00:00</string>
 
 </resources>
