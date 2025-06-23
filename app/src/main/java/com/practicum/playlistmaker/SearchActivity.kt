@@ -63,7 +63,6 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var rvTrack: RecyclerView
     private lateinit var historyView: LinearLayout
 
-
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putString(INPUT_STATE, inputValue)
@@ -73,7 +72,6 @@ class SearchActivity : AppCompatActivity() {
         super.onRestoreInstanceState(savedInstanceState)
         inputValue = savedInstanceState.getString(INPUT_STATE, INPUT_DEF)
     }
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -159,12 +157,10 @@ class SearchActivity : AppCompatActivity() {
             finish()
         }
 
-
         inputEditText.setOnFocusChangeListener { view, hasFocus ->
             historyView.visibility =
                 if (hasFocus && inputEditText.text.isEmpty() && !historyAdapter.savedList.isEmpty()) View.VISIBLE else View.GONE
         }
-
 
         val searchTextWatcher = object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
@@ -185,7 +181,6 @@ class SearchActivity : AppCompatActivity() {
 
                 val input = s.toString()
                 inputValue = input
-
             }
 
             override fun afterTextChanged(s: Editable?) {
@@ -193,7 +188,6 @@ class SearchActivity : AppCompatActivity() {
         }
 
         inputEditText.addTextChangedListener(searchTextWatcher)
-
     }
 
     private fun clickDebounce() : Boolean {

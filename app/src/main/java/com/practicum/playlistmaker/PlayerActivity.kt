@@ -29,6 +29,7 @@ class PlayerActivity : AppCompatActivity() {
     private val handler = Handler(Looper.getMainLooper())
 
     private var playerState = STATE_DEFAULT
+    private var timerRunnable: Runnable? = null
     private lateinit var cover: ImageView
     private lateinit var trackName: TextView
     private lateinit var artist: TextView
@@ -60,7 +61,7 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     private fun startPlayer() {
-        handler.post(updateTimer())
+        handler.post(timerRunnable!!)
         mediaPlayer.start()
         playButton.visibility = View.GONE
         pauseButton.visibility = View.VISIBLE
@@ -69,6 +70,7 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     private fun pausePlayer() {
+        handler.removeCallbacks(timerRunnable!!)
         mediaPlayer.pause()
         playButton.visibility = View.VISIBLE
         pauseButton.visibility = View.GONE
@@ -111,6 +113,8 @@ class PlayerActivity : AppCompatActivity() {
             intent.getParcelableExtra<Track>("chosen_Track_Key")
         })!!
 
+        timerRunnable = updateTimer()
+
         url = chosenTrack.previewUrl
 
         cover = findViewById(R.id.cover)
@@ -152,7 +156,10 @@ class PlayerActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        handler.removeCallbacksAndMessages(null)
+        if(timerRunnable != null) {
+            handler.removeCallbacks(timerRunnable!!)
+            timerRunnable = null
+        }
         mediaPlayer.release()
     }
 
