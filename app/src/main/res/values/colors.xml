@@ -9,4 +9,6 @@
     <color name="text_grey">#818C99</color>
     <color name="track_blue">#9FBBF3</color>
     <color name="track_white">#E6E8EB</color>
+    <color name="primary">#1A1B22</color>
+    <color name="secondary">#FFFFFFFF</color>
 </resources>

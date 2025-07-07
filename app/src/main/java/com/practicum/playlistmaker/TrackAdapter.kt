@@ -1,11 +1,8 @@
 package com.practicum.playlistmaker
 
-import android.content.Intent
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.google.gson.Gson
-import androidx.core.content.edit
 
 class TrackAdapter (private val onTrackClick: (Track) -> Unit
 ) : RecyclerView.Adapter<TrackViewHolder> () {
