@@ -1,9 +1,8 @@
-package com.practicum.playlistmaker
+package com.practicum.playlistmaker.ui.player
 
 import android.icu.text.SimpleDateFormat
 import android.media.MediaPlayer
 import android.os.Build
-import android.os.Build.VERSION
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -14,20 +13,13 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import com.practicum.playlistmaker.R
+import com.practicum.playlistmaker.domain.models.Track
 import java.util.Locale
 
 class PlayerActivity : AppCompatActivity() {
 
-    companion object {
-        private const val STATE_DEFAULT = 0
-        private const val STATE_PREPARED = 1
-        private const val STATE_PLAYING = 2
-        private const val STATE_PAUSED = 3
-        private const val DELAY = 300L
-    }
-
     private val handler = Handler(Looper.getMainLooper())
-
     private var playerState = STATE_DEFAULT
     private var timerRunnable: Runnable? = null
     private lateinit var cover: ImageView
@@ -61,7 +53,7 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     private fun startPlayer() {
-        handler.post(timerRunnable!!)
+        timerRunnable?.let(handler::post)
         mediaPlayer.start()
         playButton.visibility = View.GONE
         pauseButton.visibility = View.VISIBLE
@@ -107,7 +99,7 @@ class PlayerActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_player)
 
-        chosenTrack = (if (VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        chosenTrack = (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             intent.getParcelableExtra("chosen_Track_Key", Track::class.java)
         } else {
             intent.getParcelableExtra<Track>("chosen_Track_Key")
@@ -140,9 +132,7 @@ class PlayerActivity : AppCompatActivity() {
             playbackControl()
         }
 
-        //if (chosenTrack != null) {
-            bind(chosenTrack)
-        //}
+        bind(chosenTrack)
 
         backArrow.setOnClickListener {
             finish()
@@ -157,7 +147,7 @@ class PlayerActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         if(timerRunnable != null) {
-            handler.removeCallbacks(timerRunnable!!)
+            timerRunnable?.let(handler::removeCallbacks)
             timerRunnable = null
         }
         mediaPlayer.release()
@@ -179,5 +169,13 @@ class PlayerActivity : AppCompatActivity() {
         duration.text = formatter.format(item.trackTimeMillis.toLong())
         albumName.text = item.collectionName
         progressTime.text = getString(R.string.time_example)
+    }
+
+    companion object {
+        private const val STATE_DEFAULT = 0
+        private const val STATE_PREPARED = 1
+        private const val STATE_PLAYING = 2
+        private const val STATE_PAUSED = 3
+        private const val DELAY = 300L
     }
 }

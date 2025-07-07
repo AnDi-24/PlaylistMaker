@@ -1,4 +1,4 @@
-package com.practicum.playlistmaker
+package com.practicum.playlistmaker.data.dto
 
 import android.content.Context
 import android.content.SharedPreferences
@@ -7,6 +7,8 @@ import android.widget.Toast
 import androidx.core.content.edit
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.practicum.playlistmaker.domain.models.Track
+import com.practicum.playlistmaker.ui.search.TrackAdapter
 
 const val SEARCH_HISTORY = "search_history"
 const val SEARCH_HISTORY_LIST_KEY = "for_search_history_list"

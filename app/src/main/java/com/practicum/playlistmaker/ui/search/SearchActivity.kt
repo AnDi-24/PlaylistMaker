@@ -1,5 +1,4 @@
-package com.practicum.playlistmaker
-
+package com.practicum.playlistmaker.ui.search
 
 import android.content.Intent
 import android.graphics.drawable.Drawable
@@ -18,6 +17,17 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
+import com.practicum.playlistmaker.Creator
+import com.practicum.playlistmaker.R
+import com.practicum.playlistmaker.data.dto.SEARCH_HISTORY
+import com.practicum.playlistmaker.data.dto.SearchHistory
+import com.practicum.playlistmaker.domain.models.Track
+import com.practicum.playlistmaker.data.dto.TracksResponse
+import com.practicum.playlistmaker.data.dto.historyAdapter
+import com.practicum.playlistmaker.data.network.iTunesApi
+import com.practicum.playlistmaker.data.dto.savedHistory
+import com.practicum.playlistmaker.domain.api.TracksInteractor
+import com.practicum.playlistmaker.ui.player.PlayerActivity
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -39,15 +49,6 @@ class SearchActivity : AppCompatActivity() {
 
     private var searchRunnable: Runnable? = null
 
-    private val iTunesUrl = "https://itunes.apple.com"
-
-    private val retrofit = Retrofit.Builder()
-        .baseUrl(iTunesUrl)
-        .addConverterFactory(GsonConverterFactory.create())
-        .build()
-
-    private val iTunesService = retrofit.create(iTunesApi::class.java)
-
     private var inputValue: String = INPUT_DEF
 
     private val tracks = mutableListOf<Track>()
@@ -63,6 +64,8 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var rvTrack: RecyclerView
     private lateinit var historyView: LinearLayout
 
+    private lateinit var loadTrack: TracksInteractor
+
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putString(INPUT_STATE, inputValue)
@@ -77,10 +80,12 @@ class SearchActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_search)
 
+        loadTrack = Creator.provideTracksInteractor()
+
         searchHistory = SearchHistory(this)
         val playerIntent = Intent(this, PlayerActivity::class.java)
 
-        trackAdapter = TrackAdapter{
+        trackAdapter = TrackAdapter {
             val chosenTrack: Track = it
             if (clickDebounce()) {
                 startActivity(playerIntent.putExtra("chosen_Track_Key", chosenTrack))
@@ -88,7 +93,7 @@ class SearchActivity : AppCompatActivity() {
             }
         }
 
-        historyAdapter = TrackAdapter{
+        historyAdapter = TrackAdapter {
             val chosenTrack: Track = it
             startActivity(playerIntent.putExtra("chosen_Track_Key", chosenTrack))
         }
@@ -124,17 +129,6 @@ class SearchActivity : AppCompatActivity() {
         rvTrack.adapter = trackAdapter
 
         inputEditText.setText(inputValue)
-
-        //inputEditText.setOnEditorActionListener { _, actionId, _ ->
-            //if (actionId == EditorInfo.IME_ACTION_DONE) {
-                //if (inputEditText.text.isNotEmpty()) {
-                    //progressBar.visibility = View.VISIBLE
-                    //requestState()
-                //}
-                //true
-            //}
-            //false
-        //}
 
         refreshButton.setOnClickListener {
             requestState()
@@ -246,7 +240,7 @@ class SearchActivity : AppCompatActivity() {
         }
     }
 
-    private fun requestState(){
+    private fun requestState() {
         if (inputEditText.text.isNotEmpty()) {
             placeholderMessage.visibility = View.GONE
             placeholderNotFound.visibility = View.GONE
@@ -254,48 +248,42 @@ class SearchActivity : AppCompatActivity() {
             historyView.visibility = View.GONE
             rvTrack.visibility = View.GONE
 
-            iTunesService.search(inputEditText.text.toString())
-                .enqueue(object : Callback<TracksResponse> {
-                    override fun onResponse(
-                        call: Call<TracksResponse>,
-                        response: Response<TracksResponse>
-                    ) {
+            loadTrack.search(
+                inputEditText.text.toString(),
+                object : TracksInteractor.TracksConsumer {
+                    override fun consume(foundTracks: List<Track>){
+                        runOnUiThread {
                         progressBar.visibility = View.GONE
-                        if (response.isSuccessful) {
-                            val responseResults = response.body()?.results ?: emptyList()
-                            tracks.clear()
-                            if (responseResults.isNotEmpty() == true) {
-                                rvTrack.visibility = View.VISIBLE
-                                tracks.addAll(responseResults)
-                                trackAdapter.notifyDataSetChanged()
-                            }
-                            if (tracks.isEmpty()) {
-                                showMessage(
-                                    getString(R.string.nothing_found),
-                                    getDrawable(R.drawable.nothing),
-                                    ""
-                                )
-                            } else {
-                                showMessage("", null, "")
-                            }
-                        } else {
+                        tracks.clear()
+                        rvTrack.visibility = View.VISIBLE
+                        tracks.addAll(foundTracks)
+                        trackAdapter.notifyDataSetChanged()
+                        if (tracks.isEmpty()) {
                             showMessage(
-                                getString(R.string.something_went_wrong),
-                                getDrawable(R.drawable.went_wrong),
-                                response.code().toString()
+                                getString(R.string.nothing_found),
+                                getDrawable(R.drawable.nothing),
+                                ""
                             )
+                        } else {
+                            showMessage("", null, "")
                         }
-                    }
 
-                    override fun onFailure(call: Call<TracksResponse>, t: Throwable) {
-                        progressBar.visibility = View.GONE
-                        showMessage(
-                            getString(R.string.something_went_wrong),
-                            getDrawable(R.drawable.went_wrong),
-                            t.message.toString()
-                        )
-                    }
-                })
+                     //else {
+                        //showMessage(
+                            //getString(R.string.something_went_wrong),
+                            //getDrawable(R.drawable.went_wrong),
+                            //response.code().toString()
+                        //)
+                    }}
+                }
+
+                        //override fun onFailure(call: Call<TracksResponse>, t: Throwable) {
+                    //progressBar.visibility = View.GONE
+                    //showMessage(
+                        //getString(R.string.something_went_wrong),
+                        //getDrawable(R.drawable.went_wrong),
+                        //t.message.toString()
+                    )
+                }
         }
     }
-}
