@@ -1,6 +1,7 @@
 package com.practicum.playlistmaker.ui.search
 
 import android.content.Intent
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.os.Handler
@@ -19,29 +20,17 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.practicum.playlistmaker.Creator
 import com.practicum.playlistmaker.R
-import com.practicum.playlistmaker.data.dto.SEARCH_HISTORY
-import com.practicum.playlistmaker.data.dto.SearchHistory
 import com.practicum.playlistmaker.domain.models.Track
-import com.practicum.playlistmaker.data.dto.TracksResponse
-import com.practicum.playlistmaker.data.dto.historyAdapter
-import com.practicum.playlistmaker.data.network.iTunesApi
-import com.practicum.playlistmaker.data.dto.savedHistory
 import com.practicum.playlistmaker.domain.api.TracksInteractor
+import com.practicum.playlistmaker.domain.use_case.GetSavedTrackUseCase
+import com.practicum.playlistmaker.domain.use_case.GetTrackListUseCase
+import com.practicum.playlistmaker.domain.use_case.SaveHistoryUseCase
+import com.practicum.playlistmaker.domain.use_case.SaveTrackUseCase
 import com.practicum.playlistmaker.ui.player.PlayerActivity
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 
 class SearchActivity : AppCompatActivity() {
 
-    companion object {
-        private const val INPUT_STATE = "INPUT_STATE"
-        private const val INPUT_DEF = ""
-        private const val CLICK_DEBOUNCE_DELAY = 1000L
-        private const val SEARCH_DEBOUNCE_DELAY = 2000L
-    }
+    private val MAX_HISTORY_SIZE = 10
 
     private var isClickAllowed = true
 
@@ -59,12 +48,17 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var placeholderNotFound: ImageView
     private lateinit var refreshButton: ImageView
     private lateinit var inputEditText: EditText
-    private lateinit var searchHistory: SearchHistory
     private lateinit var progressBar: ProgressBar
     private lateinit var rvTrack: RecyclerView
     private lateinit var historyView: LinearLayout
-
     private lateinit var loadTrack: TracksInteractor
+    private lateinit var getTrack: GetSavedTrackUseCase
+    private lateinit var getTrackListUseCase: GetTrackListUseCase
+    private lateinit var saveTrackUseCase: SaveTrackUseCase
+    private lateinit var saveHistoryUseCase: SaveHistoryUseCase
+    lateinit var listener: OnSharedPreferenceChangeListener
+
+    lateinit var historyAdapter: TrackAdapter
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
@@ -81,30 +75,10 @@ class SearchActivity : AppCompatActivity() {
         setContentView(R.layout.activity_search)
 
         loadTrack = Creator.provideTracksInteractor()
-
-        searchHistory = SearchHistory(this)
-        val playerIntent = Intent(this, PlayerActivity::class.java)
-
-        trackAdapter = TrackAdapter {
-            val chosenTrack: Track = it
-            if (clickDebounce()) {
-                startActivity(playerIntent.putExtra("chosen_Track_Key", chosenTrack))
-                searchHistory.saveTrack(it)
-            }
-        }
-
-        historyAdapter = TrackAdapter {
-            val chosenTrack: Track = it
-            startActivity(playerIntent.putExtra("chosen_Track_Key", chosenTrack))
-        }
-
-        val clearHistoryButton = findViewById<ImageView>(R.id.clearHistoryButton)
-        val foundTrack = findViewById<RecyclerView>(R.id.foundTrack)
-        foundTrack.adapter = historyAdapter
-
-        savedHistory = getSharedPreferences(SEARCH_HISTORY, MODE_PRIVATE)
-
-        searchHistory.doHistory()
+        getTrack = Creator.provideGetSavedTrack(this)
+        saveTrackUseCase = Creator.provideSaveTrack(this)
+        getTrackListUseCase = Creator.provideGetTrackList(this)
+        saveHistoryUseCase = Creator.provideSaveHistory(this)
 
         inputEditText = findViewById(R.id.inputEditText)
         placeholderMessage = findViewById(R.id.placeholderMessage)
@@ -117,11 +91,23 @@ class SearchActivity : AppCompatActivity() {
         rvTrack = findViewById(R.id.rvTrack)
         historyView = findViewById(R.id.historyView)
 
+        val playerIntent = Intent(this, PlayerActivity::class.java)
 
-        clearHistoryButton.setOnClickListener {
-            historyAdapter.savedList.clear()
-            historyAdapter.notifyDataSetChanged()
-            historyView.visibility = View.GONE
+        historyAdapter = TrackAdapter {
+            val chosenTrack: Track = it
+            startActivity(playerIntent.putExtra("chosen_Track_Key", chosenTrack))
+        }
+
+        val clearHistoryButton = findViewById<ImageView>(R.id.clearHistoryButton)
+        val foundTrack = findViewById<RecyclerView>(R.id.foundTrack)
+        foundTrack.adapter = historyAdapter
+
+        trackAdapter = TrackAdapter {
+            val chosenTrack: Track = it
+            if (clickDebounce()) {
+                startActivity(playerIntent.putExtra("chosen_Track_Key", chosenTrack))
+                saveTrackUseCase.execute(it, listener)
+            }
         }
 
         trackAdapter.savedList = tracks
@@ -130,11 +116,19 @@ class SearchActivity : AppCompatActivity() {
 
         inputEditText.setText(inputValue)
 
+        doHistory()
+
         refreshButton.setOnClickListener {
             requestState()
         }
 
         searchRunnable = Runnable{requestState()}
+
+        clearHistoryButton.setOnClickListener {
+            historyAdapter.savedList.clear()
+            historyAdapter.notifyDataSetChanged()
+            historyView.visibility = View.GONE
+        }
 
         clearButton.setOnClickListener {
             handler.removeCallbacks(searchRunnable!!)
@@ -206,6 +200,10 @@ class SearchActivity : AppCompatActivity() {
         }
     }
 
+    private fun removeTrack(track: Track?) {
+        historyAdapter.savedList.remove(track)
+    }
+
     private fun showMessage(text: String, icon: Drawable?, additionalMessage: String) {
         if (text.isNotEmpty()) {
             placeholderMessage.visibility = View.VISIBLE
@@ -229,7 +227,7 @@ class SearchActivity : AppCompatActivity() {
 
     override fun onStop() {
         super.onStop()
-        searchHistory.saveHistory()
+        saveHistoryUseCase.execute(historyAdapter.savedList)
     }
 
     override fun onDestroy() {
@@ -237,6 +235,23 @@ class SearchActivity : AppCompatActivity() {
         if (searchRunnable != null) {
             handler.removeCallbacks(searchRunnable!!)
             searchRunnable = null
+        }
+    }
+
+    fun doHistory() {
+
+        historyAdapter.savedList = getTrackListUseCase.execute() ?: emptyList<Track>().toMutableList()
+
+        listener = OnSharedPreferenceChangeListener { sharedPreferences, key ->
+            val track = getTrack.execute()
+            removeTrack(track)
+            historyAdapter.savedList.add(0, track!!)
+            Toast.makeText(this, "Сохранено", Toast.LENGTH_SHORT)
+                .show()
+            if (historyAdapter.savedList.size > MAX_HISTORY_SIZE) {
+                historyAdapter.savedList.removeAt(MAX_HISTORY_SIZE)
+            }
+            historyAdapter.notifyItemInserted(0)
         }
     }
 
@@ -253,37 +268,43 @@ class SearchActivity : AppCompatActivity() {
                 object : TracksInteractor.TracksConsumer {
                     override fun consume(foundTracks: List<Track>){
                         runOnUiThread {
-                        progressBar.visibility = View.GONE
-                        tracks.clear()
-                        rvTrack.visibility = View.VISIBLE
-                        tracks.addAll(foundTracks)
-                        trackAdapter.notifyDataSetChanged()
-                        if (tracks.isEmpty()) {
-                            showMessage(
-                                getString(R.string.nothing_found),
-                                getDrawable(R.drawable.nothing),
-                                ""
-                            )
-                        } else {
-                            showMessage("", null, "")
-                        }
+                            progressBar.visibility = View.GONE
+                            tracks.clear()
+                            rvTrack.visibility = View.VISIBLE
+                            tracks.addAll(foundTracks)
+                            trackAdapter.notifyDataSetChanged()
+                            if (tracks.isEmpty()) {
+                                showMessage(
+                                    getString(R.string.nothing_found),
+                                    getDrawable(R.drawable.nothing),
+                                    ""
+                                )
+                            } else {
+                                showMessage("", null, "")
+                            }
 
-                     //else {
-                        //showMessage(
+                            //else {
+                            //showMessage(
                             //getString(R.string.something_went_wrong),
                             //getDrawable(R.drawable.went_wrong),
                             //response.code().toString()
-                        //)
-                    }}
+                            //)
+                        }}
                 }
 
-                        //override fun onFailure(call: Call<TracksResponse>, t: Throwable) {
-                    //progressBar.visibility = View.GONE
-                    //showMessage(
-                        //getString(R.string.something_went_wrong),
-                        //getDrawable(R.drawable.went_wrong),
-                        //t.message.toString()
-                    )
-                }
+                //override fun onFailure(call: Call<TracksResponse>, t: Throwable) {
+                //progressBar.visibility = View.GONE
+                //showMessage(
+                //getString(R.string.something_went_wrong),
+                //getDrawable(R.drawable.went_wrong),
+                //t.message.toString()
+            )
         }
     }
+    companion object {
+        private const val INPUT_STATE = "INPUT_STATE"
+        private const val INPUT_DEF = ""
+        private const val CLICK_DEBOUNCE_DELAY = 1000L
+        private const val SEARCH_DEBOUNCE_DELAY = 2000L
+    }
+}

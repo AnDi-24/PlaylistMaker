@@ -2,12 +2,11 @@ package com.practicum.playlistmaker.presentation
 
 import android.app.Application
 import androidx.appcompat.app.AppCompatDelegate
-import com.practicum.playlistmaker.data.ThemePreferences
-import com.practicum.playlistmaker.data.dto.SharedPreferencesThemeStorage
+import com.practicum.playlistmaker.Creator
+import com.practicum.playlistmaker.domain.api.ThemeSwitcher
+import com.practicum.playlistmaker.domain.use_case.LoadThemeUseCase
 
-const val THEME_CUR = "theme_app"
-const val THEME_KEY = "theme_checked"
-lateinit var themeSharedPrefs: ThemePreferences
+lateinit var themePreferences: LoadThemeUseCase
 
 class App : Application(), ThemeSwitcher {
 
@@ -15,8 +14,8 @@ class App : Application(), ThemeSwitcher {
 
     override fun onCreate() {
         super.onCreate()
-        themeSharedPrefs = SharedPreferencesThemeStorage(this)
-        darkTheme = themeSharedPrefs.loadTheme()
+        themePreferences = Creator.provideLoadTheme(this)
+        darkTheme = themePreferences.execute()
 
         switchTheme(darkTheme)
     }

@@ -33,7 +33,4 @@ data class TrackDto(
     @SerializedName("previewUrl")
     val previewUrl: String
 
-) : Parcelable {
-    fun getCoverArtwork() = artworkUrl100.replaceAfterLast('/',"512x512bb.jpg")
-    fun getReleaseYear() = releaseDate.substring(0, 4)
-}
+) : Parcelable

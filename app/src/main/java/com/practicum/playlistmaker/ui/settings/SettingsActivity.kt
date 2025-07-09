@@ -7,13 +7,13 @@ import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.net.toUri
 import com.google.android.material.switchmaterial.SwitchMaterial
+import com.practicum.playlistmaker.Creator
 import com.practicum.playlistmaker.presentation.App
 import com.practicum.playlistmaker.R
-import com.practicum.playlistmaker.data.ThemePreferences
-import com.practicum.playlistmaker.data.dto.SharedPreferencesThemeStorage
+import com.practicum.playlistmaker.domain.use_case.SaveThemeUseCase
 
 class SettingsActivity : AppCompatActivity() {
-    private lateinit var themePreferences: ThemePreferences
+    private lateinit var themePreferences: SaveThemeUseCase
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,7 +24,8 @@ class SettingsActivity : AppCompatActivity() {
         val eulaButton = findViewById<FrameLayout>(R.id.button_eula)
         val themeSwitcher = findViewById<SwitchMaterial>(R.id.themeSwitcher)
 
-        themePreferences = SharedPreferencesThemeStorage(this)
+        themePreferences = Creator.provideSaveTheme(this)
+
 
         backButton.setOnClickListener {
             finish()
@@ -32,7 +33,7 @@ class SettingsActivity : AppCompatActivity() {
 
         themeSwitcher.setOnCheckedChangeListener { switcher, checked ->
             (applicationContext as App).switchTheme(checked)
-            themePreferences.saveTheme(checked)
+            themePreferences.execute(checked)
 
             shareButton.setOnClickListener {
                 val shareIntent = Intent()

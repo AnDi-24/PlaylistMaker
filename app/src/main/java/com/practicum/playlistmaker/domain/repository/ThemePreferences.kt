@@ -1,4 +1,4 @@
-package com.practicum.playlistmaker.data
+package com.practicum.playlistmaker.domain.repository
 
 interface ThemePreferences {
     fun saveTheme(isDarkTheme: Boolean)
