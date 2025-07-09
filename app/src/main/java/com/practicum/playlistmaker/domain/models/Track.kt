@@ -1,4 +1,4 @@
-package com.practicum.playlistmaker
+package com.practicum.playlistmaker.domain.models
 
 import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
@@ -37,4 +37,3 @@ data class Track(
     fun getCoverArtwork() = artworkUrl100.replaceAfterLast('/',"512x512bb.jpg")
     fun getReleaseYear() = releaseDate.substring(0, 4)
 }
-
