@@ -6,7 +6,8 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:fitsSystemWindows="true"
-    style="@style/FrameSettings">
+    style="@style/FrameSettings"
+    >
 
     <FrameLayout
         style="@style/FrameSettings"

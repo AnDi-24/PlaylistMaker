@@ -7,7 +7,7 @@ import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.net.toUri
 import com.google.android.material.switchmaterial.SwitchMaterial
-import com.practicum.playlistmaker.Creator
+import com.practicum.playlistmaker.util.Creator
 import com.practicum.playlistmaker.presentation.App
 import com.practicum.playlistmaker.R
 import com.practicum.playlistmaker.domain.use_case.SaveThemeUseCase
@@ -34,6 +34,7 @@ class SettingsActivity : AppCompatActivity() {
         themeSwitcher.setOnCheckedChangeListener { switcher, checked ->
             (applicationContext as App).switchTheme(checked)
             themePreferences.execute(checked)
+        }
 
             shareButton.setOnClickListener {
                 val shareIntent = Intent()
@@ -44,6 +45,7 @@ class SettingsActivity : AppCompatActivity() {
                 val messageIntent = Intent.createChooser(shareIntent, null)
                 startActivity(messageIntent)
             }
+
 
             supportButton.setOnClickListener {
                 val sendIntent = Intent()
@@ -61,6 +63,6 @@ class SettingsActivity : AppCompatActivity() {
                 browseIntent.data = getString(R.string.link_eula).toUri()
                 startActivity(browseIntent)
             }
-        }
+
     }
 }

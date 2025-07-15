@@ -2,7 +2,7 @@ package com.practicum.playlistmaker.presentation
 
 import android.app.Application
 import androidx.appcompat.app.AppCompatDelegate
-import com.practicum.playlistmaker.Creator
+import com.practicum.playlistmaker.util.Creator
 import com.practicum.playlistmaker.domain.api.ThemeSwitcher
 import com.practicum.playlistmaker.domain.use_case.LoadThemeUseCase
 

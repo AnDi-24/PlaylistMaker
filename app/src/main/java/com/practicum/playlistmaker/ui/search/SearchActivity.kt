@@ -18,7 +18,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
-import com.practicum.playlistmaker.Creator
+import com.practicum.playlistmaker.util.Creator
 import com.practicum.playlistmaker.R
 import com.practicum.playlistmaker.domain.models.Track
 import com.practicum.playlistmaker.domain.api.TracksInteractor
@@ -74,7 +74,7 @@ class SearchActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_search)
 
-        loadTrack = Creator.provideTracksInteractor()
+        loadTrack = Creator.provideTracksInteractor(this)
         getTrack = Creator.provideGetSavedTrack(this)
         saveTrackUseCase = Creator.provideSaveTrack(this)
         getTrackListUseCase = Creator.provideGetTrackList(this)
@@ -266,14 +266,20 @@ class SearchActivity : AppCompatActivity() {
             loadTrack.search(
                 inputEditText.text.toString(),
                 object : TracksInteractor.TracksConsumer {
-                    override fun consume(foundTracks: List<Track>){
+                    override fun consume(foundTracks: List<Track>?, errorMessage: String?){
                         runOnUiThread {
                             progressBar.visibility = View.GONE
                             tracks.clear()
                             rvTrack.visibility = View.VISIBLE
-                            tracks.addAll(foundTracks)
+                            tracks.addAll(foundTracks ?: emptyList())
                             trackAdapter.notifyDataSetChanged()
-                            if (tracks.isEmpty()) {
+                            if (errorMessage != null) {
+                                showMessage(
+                                    getString(R.string.something_went_wrong),
+                                    getDrawable(R.drawable.went_wrong),
+                                    errorMessage
+                                )
+                            } else if (tracks.isEmpty()) {
                                 showMessage(
                                     getString(R.string.nothing_found),
                                     getDrawable(R.drawable.nothing),
