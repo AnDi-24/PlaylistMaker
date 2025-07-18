@@ -1,5 +1,6 @@
 package com.practicum.playlistmaker.util
 
+import android.app.Activity
 import android.content.Context
 import com.practicum.playlistmaker.data.TrackRepositoryImpl
 import com.practicum.playlistmaker.data.network.RetrofitNetworkClient
@@ -16,6 +17,9 @@ import com.practicum.playlistmaker.domain.use_case.LoadThemeUseCase
 import com.practicum.playlistmaker.domain.use_case.SaveHistoryUseCase
 import com.practicum.playlistmaker.domain.use_case.SaveThemeUseCase
 import com.practicum.playlistmaker.domain.use_case.SaveTrackUseCase
+import com.practicum.playlistmaker.presentation.tracks.TracksSearchPresenter
+import com.practicum.playlistmaker.presentation.tracks.TracksView
+import com.practicum.playlistmaker.ui.search.TrackAdapter
 
 object Creator {
 
@@ -57,6 +61,10 @@ object Creator {
 
     fun provideLoadTheme(context: Context): LoadThemeUseCase {
         return LoadThemeUseCase(provideThemePreferences(context))
+    }
+
+    fun provideTracksSearchPresenter(tracksView: TracksView, context: Context): TracksSearchPresenter {
+        return TracksSearchPresenter(tracksView, context)
     }
 
 }

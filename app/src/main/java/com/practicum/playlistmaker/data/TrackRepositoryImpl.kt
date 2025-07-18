@@ -40,20 +40,5 @@ class TrackRepositoryImpl (private val networkClient: NetworkClient) : TracksRep
                 Resource.Error("Ошибка сервера")
             }
         }
-
-//        return if (response.resultCode == 200) {
-//            (response as TracksResponse).results.map {
-//                Track(it.artistName,
-//                    it.artworkUrl100,
-//                    it.trackName,
-//                    it.trackTimeMillis,
-//                    it.releaseDate,
-//                    it.primaryGenreName,
-//                    it.country,
-//                    it.collectionName,
-//                    it.previewUrl) }
-//        } else {
-//            emptyList()
-//        }
     }
 }
