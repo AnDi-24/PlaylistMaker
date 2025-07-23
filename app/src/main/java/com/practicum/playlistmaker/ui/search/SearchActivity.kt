@@ -23,11 +23,28 @@ import com.practicum.playlistmaker.domain.models.Track
 import com.practicum.playlistmaker.domain.api.TracksInteractor
 import com.practicum.playlistmaker.domain.use_case.GetTrackListUseCase
 import com.practicum.playlistmaker.domain.use_case.SaveHistoryUseCase
+import com.practicum.playlistmaker.presentation.App
+import com.practicum.playlistmaker.presentation.tracks.TracksSearchPresenter
 import com.practicum.playlistmaker.presentation.tracks.TracksView
 import com.practicum.playlistmaker.ui.player.PlayerActivity
 import com.practicum.playlistmaker.ui.tracks.model.TracksState
+import moxy.MvpActivity
+import moxy.presenter.InjectPresenter
+import moxy.presenter.ProvidePresenter
 
-class SearchActivity : AppCompatActivity(), TracksView {
+
+class SearchActivity : MvpActivity(), TracksView {
+
+    @InjectPresenter
+    lateinit var tracksSearchPresenter: TracksSearchPresenter
+
+
+    @ProvidePresenter
+    fun providePresenter(): TracksSearchPresenter {
+        return Creator.provideTracksSearchPresenter(
+            context = this.applicationContext
+        )
+    }
 
     private var isClickAllowed = true
 
@@ -39,6 +56,10 @@ class SearchActivity : AppCompatActivity(), TracksView {
     private lateinit var rvTrack: RecyclerView
     private lateinit var historyView: LinearLayout
     private var textWatcher: TextWatcher? = null
+//    private var tracksSearchPresenter: TracksSearchPresenter? = null
+
+
+
 
     private val handler = Handler(Looper.getMainLooper())
 
@@ -61,14 +82,11 @@ class SearchActivity : AppCompatActivity(), TracksView {
     private var inputValue: String = INPUT_DEF
     lateinit var playerIntent: Intent
 
-    private val tracksSearchPresenter =
-        Creator.provideTracksSearchPresenter(this, this)
-
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putString(INPUT_STATE, inputValue)
+//        tracksSearchPresenter?.detachView()
     }
-
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
@@ -78,19 +96,10 @@ class SearchActivity : AppCompatActivity(), TracksView {
         )
     }
 
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_search)
 
-//        tracksSearchPresenter = (this.applicationContext as? App)?.tracksSearchPresenter
-//
-//        if (tracksSearchPresenter == null) {
-//            tracksSearchPresenter = Creator.provideTracksSearchPresenter(this, this)
-//            (this.applicationContext as? SearchActivity)?.tracksSearchPresenter = tracksSearchPresenter
-//
-//        }
 
         inputEditText = findViewById(R.id.inputEditText)
         placeholderMessage = findViewById(R.id.placeholderMessage)
@@ -111,6 +120,15 @@ class SearchActivity : AppCompatActivity(), TracksView {
 
         val backButton = findViewById<ImageView>(R.id.button_back)
 
+//        tracksSearchPresenter = (this.application as? App)?.tracksSearchPresenter
+//
+//        if (tracksSearchPresenter == null) {
+//            tracksSearchPresenter = Creator.provideTracksSearchPresenter(this.applicationContext)
+//            (this.application as? App)?.tracksSearchPresenter = tracksSearchPresenter
+//        }
+
+//        tracksSearchPresenter.attachView(this)
+
         tracksSearchPresenter.doHistory()
 
         backButton.setOnClickListener {
@@ -120,7 +138,6 @@ class SearchActivity : AppCompatActivity(), TracksView {
         rvTrack.adapter = trackAdapter
         foundTrack.adapter = historyAdapter
         inputEditText.setText(inputValue)
-
 
         refreshButton.setOnClickListener {
             tracksSearchPresenter.requestState(inputEditText.toString())
@@ -188,16 +205,35 @@ class SearchActivity : AppCompatActivity(), TracksView {
 
     }
 
+//    override fun onStart() {
+//        super.onStart()
+//        tracksSearchPresenter.attachView(this)
+//    }
+//
+//    override fun onResume() {
+//        super.onResume()
+//        tracksSearchPresenter.attachView(this)
+//    }
+
+//    override fun onPause() {
+//        super.onPause()
+//        tracksSearchPresenter.detachView()
+//    }
+
     override fun onStop() {
         super.onStop()
         saveHistoryUseCase.execute(historyAdapter.savedList)
+//        tracksSearchPresenter.detachView()
     }
 
     override fun onDestroy() {
         super.onDestroy()
         textWatcher?.let { inputEditText.removeTextChangedListener(it) }
-
-        tracksSearchPresenter.onDestroy()
+//        tracksSearchPresenter.onDestroy()
+//        tracksSearchPresenter.detachView()
+//        if (isFinishing) {
+//            (this.application as? App)?.tracksSearchPresenter = null
+//        }
     }
 
     private fun clickDebounce(): Boolean {
@@ -247,7 +283,7 @@ class SearchActivity : AppCompatActivity(), TracksView {
         historyAdapter.savedList.removeAt(position)
     }
 
-    override fun showContent(tracks: List<Track>) {
+    fun showContent(tracks: List<Track>) {
         progressBar.visibility = View.GONE
         placeholderMessage.visibility = View.GONE
         placeholderNotFound.visibility = View.GONE
@@ -258,7 +294,7 @@ class SearchActivity : AppCompatActivity(), TracksView {
         trackAdapter.notifyDataSetChanged()
     }
 
-    override fun showLoading() {
+    fun showLoading() {
         placeholderMessage.visibility = View.GONE
         placeholderNotFound.visibility = View.GONE
         progressBar.visibility = View.VISIBLE
@@ -266,7 +302,7 @@ class SearchActivity : AppCompatActivity(), TracksView {
         rvTrack.visibility = View.GONE
     }
 
-    override fun showEmpty(emptyMessage: String, icon: Drawable?) {
+    fun showEmpty(emptyMessage: String, icon: Drawable?) {
         placeholderMessage.visibility = View.VISIBLE
         placeholderNotFound.visibility = View.VISIBLE
         tracksSearchPresenter.clearTracks()
@@ -276,7 +312,7 @@ class SearchActivity : AppCompatActivity(), TracksView {
         placeholderNotFound.setImageDrawable(icon)
     }
 
-    override fun showError(errorMessage: String, icon: Drawable?, additionalMessage: String) {
+    fun showError(errorMessage: String, icon: Drawable?, additionalMessage: String) {
         placeholderMessage.visibility = View.VISIBLE
         placeholderNotFound.visibility = View.VISIBLE
         tracksSearchPresenter.clearTracks()

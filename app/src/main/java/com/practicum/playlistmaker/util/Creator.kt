@@ -63,8 +63,8 @@ object Creator {
         return LoadThemeUseCase(provideThemePreferences(context))
     }
 
-    fun provideTracksSearchPresenter(tracksView: TracksView, context: Context): TracksSearchPresenter {
-        return TracksSearchPresenter(tracksView, context)
+    fun provideTracksSearchPresenter( context: Context): TracksSearchPresenter {
+        return TracksSearchPresenter(context)
     }
 
 }

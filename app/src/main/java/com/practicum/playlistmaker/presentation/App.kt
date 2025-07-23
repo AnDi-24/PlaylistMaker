@@ -10,6 +10,8 @@ lateinit var themePreferences: LoadThemeUseCase
 
 class App : Application() {
 
+    //var tracksSearchPresenter: TracksSearchPresenter? = null
+
     private var darkTheme = false
 
     override fun onCreate() {

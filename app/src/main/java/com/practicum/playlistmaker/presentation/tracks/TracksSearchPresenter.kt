@@ -17,12 +17,17 @@ import com.practicum.playlistmaker.domain.use_case.SaveTrackUseCase
 import com.practicum.playlistmaker.ui.search.TrackAdapter
 import com.practicum.playlistmaker.ui.tracks.model.TracksState
 import com.practicum.playlistmaker.util.Creator
-import kotlin.text.clear
+import moxy.MvpPresenter
+
 
 class TracksSearchPresenter(
-    private val view: TracksView,
     private val context: Context
-) {
+): MvpPresenter<TracksView>() {
+
+//    private var view: TracksView? = null
+//    private var state: TracksState? = null
+    private var latestSearchText: String? = null
+
 
     private val MAX_HISTORY_SIZE = 10
     private var searchRunnable: Runnable? = null
@@ -37,6 +42,21 @@ class TracksSearchPresenter(
     private val tracks = mutableListOf<Track>()
     private val handler = Handler(Looper.getMainLooper())
 
+//    fun attachView(view: TracksView) {
+//        this.view = view
+//        state?.let { view.render(it)}
+//    }
+//
+//    fun detachView() {
+//        this.view = null
+//    }
+
+    private fun renderState(state: TracksState) {
+        viewState.render(state)
+//        this.state = state
+//        this.view?.render(state)
+    }
+
     fun onCreate(){
 
         searchRunnable = Runnable{val newSearchText = lastSearchText ?: ""
@@ -47,16 +67,17 @@ class TracksSearchPresenter(
 
     }
 
-    fun onDestroy(){
-        if (searchRunnable != null) {
-            handler.removeCallbacks(searchRunnable!!)
-            searchRunnable = null
-        }
+    override fun onDestroy(){
+        handler.removeCallbacksAndMessages(SEARCH_REQUEST_TOKEN)
+//        if (searchRunnable != null) {
+//            handler.removeCallbacks(searchRunnable!!)
+//            searchRunnable = null
+//        }
     }
 
     fun requestState(newSearchText: String) {
         if (newSearchText.isNotEmpty()) {
-            view.showLoading()
+            renderState(TracksState.Loading)
 
             loadTrack.search(
                 newSearchText,
@@ -70,7 +91,7 @@ class TracksSearchPresenter(
 
                             when {
                                 errorMessage != null -> {
-                                    view.render(
+                                    renderState(
                                         TracksState.Error(
                                             context.getString(R.string.something_went_wrong),
                                             context.getDrawable(R.drawable.went_wrong),
@@ -79,7 +100,7 @@ class TracksSearchPresenter(
                                     )
                                 }
                                 tracks.isEmpty() -> {
-                                    view.render(
+                                    renderState(
                                         TracksState.Empty(
                                         context.getString((R.string.nothing_found)),
                                         context.getDrawable(R.drawable.nothing)
@@ -88,7 +109,7 @@ class TracksSearchPresenter(
                                     )
                                 }
                                 else -> {
-                                    view.render(
+                                    renderState(
                                         TracksState.Content(tracks)
                                     )
                                 }
@@ -102,6 +123,9 @@ class TracksSearchPresenter(
     }
 
     fun searchDebounce(changedText: String) {
+        if (latestSearchText == changedText) {
+            return
+        }
         this.lastSearchText = changedText
         handler.removeCallbacks(searchRunnable!!)
         handler.postDelayed(searchRunnable!!, SEARCH_DEBOUNCE_DELAY)
@@ -109,8 +133,9 @@ class TracksSearchPresenter(
 
     fun clearButton(){
         handler.removeCallbacks(searchRunnable!!)
-        view.showContent(tracks)
-        view.updateHistory()
+        renderState(
+            TracksState.Content(tracks))
+        viewState.updateHistory()
 
     }
 
@@ -119,7 +144,7 @@ class TracksSearchPresenter(
     }
 
     private fun removeTrack(track: Track?) {
-        view.historyRemove(track)
+        viewState.historyRemove(track)
     }
 
     fun saveTrackFromListener(track: Track){
@@ -128,21 +153,24 @@ class TracksSearchPresenter(
 
     fun doHistory() {
 
-        view.getTrackListFromHistory()
+        viewState.getTrackListFromHistory()
 
         listener = OnSharedPreferenceChangeListener { sharedPreferences, key ->
             val track = getTrack.execute()
             removeTrack(track)
-            view.historyAdd(track!!)
-            view.showToast("Сохранено")
-            if (view.historySize() > MAX_HISTORY_SIZE) {
-                view.historyRemoveAt(MAX_HISTORY_SIZE)
+            viewState.historyAdd(track!!)
+            viewState.showToast("Сохранено")
+            viewState.historySize().let {
+                if (it > MAX_HISTORY_SIZE) {
+                    viewState.historyRemoveAt(MAX_HISTORY_SIZE)
+                }
             }
-            view.updateHistory()
+            viewState.updateHistory()
         }
     }
     companion object {
         private const val SEARCH_DEBOUNCE_DELAY = 2000L
+        private val SEARCH_REQUEST_TOKEN = Any()
 
     }
 }

@@ -1,7 +1,11 @@
+import org.gradle.kotlin.dsl.implementation
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     id("kotlin-parcelize")
+    id ("kotlin-kapt")
+
 }
 
 android {
@@ -37,6 +41,11 @@ android {
 }
 
 dependencies {
+
+    implementation(libs.moxy)
+    implementation(libs.kapt)
+    implementation(libs.moxy.compiler)
+
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
