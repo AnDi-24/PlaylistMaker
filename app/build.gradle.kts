@@ -38,15 +38,18 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
+    buildFeatures {
+        viewBinding = true
+    }
 }
 
 dependencies {
 
-    implementation(libs.moxy)
-    implementation(libs.kapt)
-    implementation(libs.moxy.compiler)
-
-
+//    implementation(libs.moxy)
+//    implementation(libs.kapt)
+//    implementation(libs.moxy.compiler)
+    implementation(libs.androidx.lifecycle.livedata.ktx)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)

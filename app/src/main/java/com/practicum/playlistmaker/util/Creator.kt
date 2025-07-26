@@ -1,25 +1,25 @@
 package com.practicum.playlistmaker.util
 
-import android.app.Activity
 import android.content.Context
-import com.practicum.playlistmaker.data.TrackRepositoryImpl
-import com.practicum.playlistmaker.data.network.RetrofitNetworkClient
-import com.practicum.playlistmaker.data.repository.SearchHistoryRepositoryImpl
-import com.practicum.playlistmaker.data.repository.ThemePreferencesImpl
-import com.practicum.playlistmaker.domain.api.TracksInteractor
-import com.practicum.playlistmaker.domain.api.TracksRepository
-import com.practicum.playlistmaker.domain.impl.TracksInteractorImpl
-import com.practicum.playlistmaker.domain.repository.SearchHistoryRepository
-import com.practicum.playlistmaker.domain.repository.ThemePreferences
-import com.practicum.playlistmaker.domain.use_case.GetSavedTrackUseCase
-import com.practicum.playlistmaker.domain.use_case.GetTrackListUseCase
-import com.practicum.playlistmaker.domain.use_case.LoadThemeUseCase
-import com.practicum.playlistmaker.domain.use_case.SaveHistoryUseCase
-import com.practicum.playlistmaker.domain.use_case.SaveThemeUseCase
-import com.practicum.playlistmaker.domain.use_case.SaveTrackUseCase
-import com.practicum.playlistmaker.presentation.tracks.TracksSearchPresenter
-import com.practicum.playlistmaker.presentation.tracks.TracksView
-import com.practicum.playlistmaker.ui.search.TrackAdapter
+import com.practicum.playlistmaker.search.data.impl.TrackRepositoryImpl
+import com.practicum.playlistmaker.search.data.network.RetrofitNetworkClient
+import com.practicum.playlistmaker.search.data.impl.SearchHistoryRepositoryImpl
+import com.practicum.playlistmaker.settings.data.impl.ThemePreferencesImpl
+import com.practicum.playlistmaker.search.domain.api.TracksInteractor
+import com.practicum.playlistmaker.search.domain.api.TracksRepository
+import com.practicum.playlistmaker.search.domain.impl.TracksInteractorImpl
+import com.practicum.playlistmaker.search.domain.repository.SearchHistoryRepository
+import com.practicum.playlistmaker.settings.domain.repository.ThemePreferences
+import com.practicum.playlistmaker.search.domain.use_case.GetSavedTrackUseCase
+import com.practicum.playlistmaker.search.domain.use_case.GetTrackListUseCase
+import com.practicum.playlistmaker.settings.domain.use_case.LoadThemeUseCase
+import com.practicum.playlistmaker.search.domain.use_case.SaveHistoryUseCase
+import com.practicum.playlistmaker.settings.domain.use_case.SaveThemeUseCase
+import com.practicum.playlistmaker.search.domain.use_case.SaveTrackUseCase
+import com.practicum.playlistmaker.sharing.SharingInteractor
+import com.practicum.playlistmaker.sharing.data.impl.ExternalNavigatorImpl
+import com.practicum.playlistmaker.sharing.domain.ExternalNavigator
+import com.practicum.playlistmaker.sharing.impl.SharingInteractorImpl
 
 object Creator {
 
@@ -31,7 +31,11 @@ object Creator {
         return SearchHistoryRepositoryImpl(context)
     }
 
-    private fun provideThemePreferences(context: Context): ThemePreferences {
+    private fun getExternalNavigator(context: Context): ExternalNavigator{
+        return ExternalNavigatorImpl(context)
+    }
+
+    fun provideThemePreferences(context: Context): ThemePreferences {
         return ThemePreferencesImpl(context)
     }
 
@@ -63,8 +67,8 @@ object Creator {
         return LoadThemeUseCase(provideThemePreferences(context))
     }
 
-    fun provideTracksSearchPresenter( context: Context): TracksSearchPresenter {
-        return TracksSearchPresenter(context)
+    fun provideSharingInteractor(context: Context): SharingInteractor{
+        return SharingInteractorImpl(getExternalNavigator(context))
     }
 
 }
