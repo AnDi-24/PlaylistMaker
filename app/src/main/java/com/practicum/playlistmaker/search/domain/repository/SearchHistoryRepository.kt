@@ -1,9 +1,11 @@
 package com.practicum.playlistmaker.search.domain.repository
 
-import android.content.SharedPreferences
 import com.practicum.playlistmaker.search.domain.models.Track
 
 interface SearchHistoryRepository {
+
+    fun registerListener(listener: HistoryChangeListener)
+    fun unregisterListener()
 
     fun createTracksListFromJson(json: String): MutableList<Track>
 
@@ -15,11 +17,10 @@ interface SearchHistoryRepository {
 
     fun saveHistory(tracks: MutableList<Track>)
 
-    fun saveTrack(track: Track, listener: SharedPreferences.OnSharedPreferenceChangeListener)
+    fun saveTrack(track: Track)
 
     fun getTrack(): Track?
 
     fun getTrackList(): MutableList<Track>?
 
-    fun getSharedPref(): SharedPreferences
 }

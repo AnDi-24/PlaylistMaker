@@ -1,10 +1,10 @@
 package com.practicum.playlistmaker.search.domain.models
 
-import android.os.Parcelable
-import com.google.gson.annotations.SerializedName
-import kotlinx.parcelize.Parcelize
 
-@Parcelize
+import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class Track(
     @SerializedName("artistName")
     val artistName: String,
@@ -33,7 +33,8 @@ data class Track(
     @SerializedName("previewUrl")
     val previewUrl: String
 
-) : Parcelable {
+)  {
+
     fun getCoverArtwork() = artworkUrl100.replaceAfterLast('/',"512x512bb.jpg")
     fun getReleaseYear() = releaseDate.substring(0, 4)
 }

@@ -9,17 +9,18 @@ import com.practicum.playlistmaker.search.domain.api.TracksInteractor
 import com.practicum.playlistmaker.search.domain.api.TracksRepository
 import com.practicum.playlistmaker.search.domain.impl.TracksInteractorImpl
 import com.practicum.playlistmaker.search.domain.repository.SearchHistoryRepository
+import com.practicum.playlistmaker.search.domain.use_case.GetListenerUseCase
 import com.practicum.playlistmaker.settings.domain.repository.ThemePreferences
-import com.practicum.playlistmaker.search.domain.use_case.GetSavedTrackUseCase
+import com.practicum.playlistmaker.search.domain.use_case.UnregListenerSavedTrack
 import com.practicum.playlistmaker.search.domain.use_case.GetTrackListUseCase
 import com.practicum.playlistmaker.settings.domain.use_case.LoadThemeUseCase
 import com.practicum.playlistmaker.search.domain.use_case.SaveHistoryUseCase
 import com.practicum.playlistmaker.settings.domain.use_case.SaveThemeUseCase
 import com.practicum.playlistmaker.search.domain.use_case.SaveTrackUseCase
-import com.practicum.playlistmaker.sharing.SharingInteractor
+import com.practicum.playlistmaker.sharing.domain.api.SharingInteractor
 import com.practicum.playlistmaker.sharing.data.impl.ExternalNavigatorImpl
 import com.practicum.playlistmaker.sharing.domain.ExternalNavigator
-import com.practicum.playlistmaker.sharing.impl.SharingInteractorImpl
+import com.practicum.playlistmaker.sharing.domain.impl.SharingInteractorImpl
 
 object Creator {
 
@@ -43,8 +44,12 @@ object Creator {
         return TracksInteractorImpl(getTracksRepository(context))
     }
 
-    fun provideGetSavedTrack(context: Context): GetSavedTrackUseCase {
-        return GetSavedTrackUseCase(provideSearchHistoryRepository(context))
+    fun provideUnregListenerSavedTrack(context: Context): UnregListenerSavedTrack {
+        return UnregListenerSavedTrack(provideSearchHistoryRepository(context))
+    }
+
+    fun provideGetListener(context: Context): GetListenerUseCase{
+        return GetListenerUseCase(provideSearchHistoryRepository(context))
     }
 
     fun provideGetTrackList(context: Context): GetTrackListUseCase {

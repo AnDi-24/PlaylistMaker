@@ -7,15 +7,17 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import com.practicum.playlistmaker.R
 import com.practicum.playlistmaker.databinding.ActivitySettingsBinding
-import com.practicum.playlistmaker.settings.domain.App
+import com.practicum.playlistmaker.App
+import com.practicum.playlistmaker.settings.domain.use_case.LoadThemeUseCase
 import com.practicum.playlistmaker.settings.domain.use_case.SaveThemeUseCase
-import com.practicum.playlistmaker.sharing.SharingInteractor
+import com.practicum.playlistmaker.sharing.domain.api.SharingInteractor
 import com.practicum.playlistmaker.util.Creator
 
 class SettingsActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivitySettingsBinding
-    private lateinit var themePreferences: SaveThemeUseCase
+    private lateinit var themeSavePreferences: SaveThemeUseCase
+    private lateinit var themeLoadPreferences: LoadThemeUseCase
     private lateinit var sharingInteractor: SharingInteractor
     private var viewModel: SettingsViewModel? = null
 
@@ -26,14 +28,19 @@ class SettingsActivity : AppCompatActivity() {
         binding = ActivitySettingsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        themePreferences = Creator.provideSaveTheme(this)
+        themeSavePreferences = Creator.provideSaveTheme(this)
+        themeLoadPreferences = Creator.provideLoadTheme(this)
         sharingInteractor = Creator.provideSharingInteractor(this)
 
-        viewModel = ViewModelProvider(this, SettingsViewModel.getFactory(sharingInteractor))
+        viewModel = ViewModelProvider(this, SettingsViewModel.getFactory(
+            sharingInteractor,
+            applicationContext as App,
+            themeLoadPreferences,
+            themeSavePreferences))
             .get(SettingsViewModel::class.java)
+
         binding.themeSwitcher.setOnCheckedChangeListener { switcher, checked ->
-            (applicationContext as App).switchTheme(checked)
-            themePreferences.execute(checked)
+            viewModel?.switchTheme(checked)
         }
 
         binding.buttonShare.setOnClickListener {

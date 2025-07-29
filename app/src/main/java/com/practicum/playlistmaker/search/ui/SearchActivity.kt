@@ -22,6 +22,7 @@ import com.practicum.playlistmaker.search.domain.use_case.GetTrackListUseCase
 import com.practicum.playlistmaker.search.domain.use_case.SaveHistoryUseCase
 import com.practicum.playlistmaker.player.ui.PlayerActivity
 import com.practicum.playlistmaker.search.ui.model.SearchState
+import kotlinx.serialization.json.Json
 
 
 class SearchActivity : AppCompatActivity() {
@@ -29,22 +30,23 @@ class SearchActivity : AppCompatActivity() {
     private var isClickAllowed = true
 
     private lateinit var binding: ActivitySearchBinding
+
     private var textWatcher: TextWatcher? = null
     private var viewModel: TracksViewModel? = null
 
     private val handler = Handler(Looper.getMainLooper())
 
     private val trackAdapter = TrackAdapter {
-        val chosenTrack: Track = it
+        val chosenTrackToString = Json.encodeToString(it)
         if (clickDebounce()) {
-            startActivity(playerIntent.putExtra("chosen_Track_Key", chosenTrack))
+            startActivity(playerIntent.putExtra("chosen_Track_Key", chosenTrackToString))
             viewModel?.saveTrackFromListener(it)
         }
     }
 
-    private val historyAdapter = TrackAdapter {
-        val chosenTrack: Track = it
-        startActivity(playerIntent.putExtra("chosen_Track_Key", chosenTrack))
+    private var historyAdapter = TrackAdapter {
+        val chosenTrackToString = Json.encodeToString(it)
+        startActivity(playerIntent.putExtra("chosen_Track_Key", chosenTrackToString))
     }
 
     private lateinit var loadTrack: TracksInteractor
@@ -90,30 +92,9 @@ class SearchActivity : AppCompatActivity() {
             showToast(it)
         }
 
-        viewModel?.observeRemoveTrack()?.observe(this){
-            historyAdapter.savedList.remove(it)
-        }
-
-        viewModel?.observeHistoryAdd()?.observe(this){
-            historyAdapter.savedList.add(0, it)
-        }
-
-        viewModel?.observeHistoryRemoveAt()?.observe(this){
-            historyAdapter.savedList.removeAt(it)
-        }
-
-        viewModel?.observeGetTrackListFromHistory()?.observe(this){
-            historyAdapter.savedList =
-                getTrackListUseCase.execute() ?: emptyList<Track>().toMutableList()
-        }
-
-        viewModel?.observeUpdateHistory()?.observe(this){
-            historyAdapter.notifyDataSetChanged()
-        }
-
         val backButton = findViewById<ImageView>(R.id.button_back)
 
-        viewModel?.doHistory(historyAdapter.savedList.size)
+        historyAdapter.savedList = getTrackListUseCase.execute() ?: emptyList<Track>().toMutableList()
 
         backButton.setOnClickListener {
             finish()
@@ -259,12 +240,29 @@ class SearchActivity : AppCompatActivity() {
         }
     }
 
+    fun removeAt(position: Int){
+        historyAdapter.savedList.removeAt(position)
+        historyAdapter.notifyDataSetChanged()
+    }
+    fun historyActions(track: Track){
+        historyAdapter.savedList.remove(track)
+        historyAdapter.notifyDataSetChanged()
+        historyAdapter.savedList.add(0, track)
+        historyAdapter.notifyDataSetChanged()
+        viewModel?.cleanHistory(historyAdapter.savedList.size)
+        historyAdapter.notifyDataSetChanged()
+    }
+
+
+
     fun render(state: SearchState) {
         when(state) {
             is SearchState.Loading -> showLoading()
             is SearchState.Error -> showError(state.errorMessage, state.icon)
             is SearchState.Empty -> showEmpty(state.emptyMessage, state.icon)
             is SearchState.Content ->showContent(state.tracks)
+            is SearchState.HistoryActions -> historyActions(state.track)
+            is SearchState.RemoveAt -> removeAt(state.position)
         }
     }
 

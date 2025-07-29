@@ -21,4 +21,12 @@ sealed interface SearchState {
         val emptyMessage: String,
         val icon: Drawable?
     ) : SearchState
+
+    data class HistoryActions(
+        val track: Track
+    ): SearchState
+
+    data class RemoveAt(
+        val position: Int
+    ): SearchState
 }

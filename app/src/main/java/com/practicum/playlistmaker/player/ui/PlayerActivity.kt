@@ -1,7 +1,6 @@
 package com.practicum.playlistmaker.player.ui
 
 import android.icu.text.SimpleDateFormat
-import android.os.Build
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
@@ -10,7 +9,9 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.practicum.playlistmaker.R
 import com.practicum.playlistmaker.databinding.ActivityPlayerBinding
+import com.practicum.playlistmaker.player.ui.model.PlayerStates
 import com.practicum.playlistmaker.search.domain.models.Track
+import kotlinx.serialization.json.Json
 import java.util.Locale
 
 class PlayerActivity : AppCompatActivity() {
@@ -27,45 +28,46 @@ class PlayerActivity : AppCompatActivity() {
         binding = ActivityPlayerBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        chosenTrack = (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            intent.getParcelableExtra("chosen_Track_Key", Track::class.java)
-        } else {
-            intent.getParcelableExtra<Track>("chosen_Track_Key")
-        })!!
+        chosenTrack = Json.decodeFromString((intent.getSerializableExtra("chosen_Track_Key").toString()))
 
         viewModel = ViewModelProvider(
             this,
             PlayerViewModel.Companion.getFactory(chosenTrack.previewUrl)
         ).get(PlayerViewModel::class.java)
 
-        viewModel.observePlay().observe(this){
+
+        viewModel.observePlayer().observe(this){
+            if (it.playerState == PlayerStates.PLAYING){
             binding.apply {
                 playButton.visibility = View.GONE
                 pauseButton.visibility = View.VISIBLE
                 pauseButton.isEnabled = true
-            }
+            }}
         }
 
-        viewModel.observePause().observe(this){
+        viewModel.observePlayer().observe(this){
+            if (it.playerState == PlayerStates.PAUSED){
             binding.apply {
                 playButton.visibility = View.VISIBLE
                 pauseButton.visibility = View.GONE
-            }
+            }}
         }
 
-        viewModel.observePrepare().observe(this){
+        viewModel.observePlayer().observe(this){
+            if (it.playerState == PlayerStates.PREPARED){
             binding.apply {
                 playButton.isEnabled = true
                 playButton.visibility = View.VISIBLE
                 pauseButton.visibility = View.GONE
             }
+            }
         }
 
-        viewModel.observeUpdateTimer().observe(this){
-            binding.progress.text = it
+        viewModel.observePlayer().observe(this){
+            binding.progress.text = it.timer
         }
 
-            binding.playButton.setOnClickListener {
+        binding.playButton.setOnClickListener {
             viewModel.playbackControl()
         }
 
