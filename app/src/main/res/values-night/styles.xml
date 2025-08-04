@@ -45,6 +45,7 @@
         <item name="android:layout_gravity">top</item>
         <item name="android:orientation">horizontal</item>
         <item name="android:backgroundTint">@color/icon_black</item>
+        <item name="android:background">@color/bg_blue</item>
         <item name="android:foreground">?attr/selectableItemBackground</item>
     </style>
 
@@ -100,6 +101,10 @@
     </style>
 
     <style name="bg">
+        <item name="android:background">@color/icon_black</item>
+    </style>
+
+    <style name="bgPlayer">
         <item name="android:background">@color/icon_black</item>
     </style>
 
