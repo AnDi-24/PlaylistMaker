@@ -4,7 +4,6 @@ import android.icu.text.SimpleDateFormat
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.practicum.playlistmaker.R
@@ -12,13 +11,15 @@ import com.practicum.playlistmaker.databinding.ActivityPlayerBinding
 import com.practicum.playlistmaker.player.ui.model.PlayerStates
 import com.practicum.playlistmaker.search.domain.models.Track
 import kotlinx.serialization.json.Json
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 import java.util.Locale
 
 class PlayerActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityPlayerBinding
-    private lateinit var chosenTrack: Track
-    private lateinit var viewModel: PlayerViewModel
+
+    private val viewModel: PlayerViewModel by viewModel()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -27,14 +28,9 @@ class PlayerActivity : AppCompatActivity() {
 
         binding = ActivityPlayerBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        chosenTrack = Json.decodeFromString((intent.getSerializableExtra("chosen_Track_Key").toString()))
-
-        viewModel = ViewModelProvider(
-            this,
-            PlayerViewModel.Companion.getFactory(chosenTrack.previewUrl)
-        ).get(PlayerViewModel::class.java)
-
+        val chosenTrack: Track = Json.decodeFromString((intent.getSerializableExtra("chosen_Track_Key").toString()))
+        val viewModel: PlayerViewModel by viewModel { (
+                parametersOf(chosenTrack.previewUrl)) }
 
         viewModel.observePlayer().observe(this){
             if (it.playerState == PlayerStates.PLAYING){
@@ -101,7 +97,7 @@ class PlayerActivity : AppCompatActivity() {
             yearName.text = item.getReleaseYear()
             genreName.text = item.primaryGenreName
             countryName.text = item.country
-            duration.text = formatter.format(item.trackTimeMillis.toLong())
+            durationTime.text = formatter.format(item.trackTimeMillis.toLong())
             albumName.text = item.collectionName
             progress.text = getString(R.string.time_example)
         }

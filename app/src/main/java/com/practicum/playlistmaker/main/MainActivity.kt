@@ -23,11 +23,12 @@ class MainActivity : AppCompatActivity() {
                 val searchIntent = Intent(this@MainActivity, SearchActivity::class.java)
                 startActivity(searchIntent)
             }
-
         }
+
         binding.buttonSearch.setOnClickListener(buttonClickListener)
 
-        binding.buttonMedia.setOnClickListener { val mediaIntent = Intent(this, MediaActivity::class.java)
+        binding.buttonMedia.setOnClickListener { val mediaIntent =
+            Intent(this, MediaActivity::class.java)
             startActivity(mediaIntent)
         }
 

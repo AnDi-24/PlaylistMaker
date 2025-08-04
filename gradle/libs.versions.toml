@@ -17,6 +17,7 @@ retrofit = "3.0.0"
 lifecycleRuntimeKtx = "2.9.2"
 #moxyVersion = "2.2.2"
 kotlinSerJson = "1.9.0"
+koinVersion = "4.1.0"
 [libraries]
 
 #kapt = {module = "com.github.moxy-community:moxy-compiler", version.ref ="moxyVersion"}
@@ -38,6 +39,7 @@ androidx-constraintlayout = { group = "androidx.constraintlayout", name = "const
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 retrofit2-converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson"}
 kotlinx-serialization = {module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinSerJson" }
+koin = {module = "io.insert-koin:koin-android", version.ref = "koinVersion"}
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

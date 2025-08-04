@@ -1,13 +1,12 @@
 package com.practicum.playlistmaker.settings.data.impl
 
-import android.content.Context
+import android.content.SharedPreferences
 import androidx.core.content.edit
 import com.practicum.playlistmaker.settings.domain.repository.ThemePreferences
 
-const val THEME_CUR = "theme_app"
+
 const val THEME_KEY = "theme_checked"
-class ThemePreferencesImpl (context: Context) : ThemePreferences {
-    private val sharedPrefs = context.getSharedPreferences(THEME_CUR, Context.MODE_PRIVATE)
+class ThemePreferencesImpl (private val sharedPrefs: SharedPreferences) : ThemePreferences {
 
     override fun saveTheme(isDarkTheme: Boolean) {
         sharedPrefs.edit {

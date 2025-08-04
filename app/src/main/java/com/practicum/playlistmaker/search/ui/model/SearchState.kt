@@ -1,6 +1,6 @@
 package com.practicum.playlistmaker.search.ui.model
 
-import android.graphics.drawable.Drawable
+
 import com.practicum.playlistmaker.search.domain.models.Track
 
 sealed interface SearchState {
@@ -12,15 +12,10 @@ sealed interface SearchState {
     ) : SearchState
 
     data class Error(
-        val errorMessage: String,
-        val icon: Drawable?,
         val additionalMessage: String
     ) : SearchState
 
-    data class Empty(
-        val emptyMessage: String,
-        val icon: Drawable?
-    ) : SearchState
+    object Empty : SearchState
 
     data class HistoryActions(
         val track: Track

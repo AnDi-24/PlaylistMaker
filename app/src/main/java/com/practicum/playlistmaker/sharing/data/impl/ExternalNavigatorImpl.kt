@@ -14,6 +14,7 @@ class ExternalNavigatorImpl(val context: Context): ExternalNavigator {
         shareIntent.putExtra(Intent.EXTRA_TEXT, appLink)
         shareIntent.type = "text/plain"
         val messageIntent = Intent.createChooser(shareIntent, null)
+        messageIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
         context.startActivity(messageIntent)
     }
 
@@ -21,6 +22,7 @@ class ExternalNavigatorImpl(val context: Context): ExternalNavigator {
         val browseIntent = Intent()
         browseIntent.action = Intent.ACTION_VIEW
         browseIntent.data = eulaLink.toUri()
+        browseIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
         context.startActivity(browseIntent)
     }
 
@@ -31,6 +33,7 @@ class ExternalNavigatorImpl(val context: Context): ExternalNavigator {
         sendIntent.putExtra(Intent.EXTRA_EMAIL, arrayOf(support.emailAddress))
         sendIntent.putExtra(Intent.EXTRA_TEXT, support.emailText)
         sendIntent.putExtra(Intent.EXTRA_SUBJECT, support.emailSubject)
+        sendIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
         context.startActivity(sendIntent)
     }
 }
