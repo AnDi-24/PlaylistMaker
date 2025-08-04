@@ -10,8 +10,6 @@ import com.practicum.playlistmaker.search.data.network.iTunesApi
 import com.practicum.playlistmaker.search.domain.repository.SearchHistoryRepository
 import com.practicum.playlistmaker.settings.data.impl.ThemePreferencesImpl
 import com.practicum.playlistmaker.settings.domain.repository.ThemePreferences
-import com.practicum.playlistmaker.sharing.data.impl.ExternalNavigatorImpl
-import com.practicum.playlistmaker.sharing.domain.ExternalNavigator
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 import retrofit2.Retrofit
@@ -45,10 +43,6 @@ val dataModule = module {
     factory<ThemePreferences>{
         ThemePreferencesImpl(androidContext()
             .getSharedPreferences("THEME_CUR", Context.MODE_PRIVATE))
-    }
-
-    factory <ExternalNavigator>{
-        ExternalNavigatorImpl(androidContext())
     }
 
     factory { MediaPlayer() }
