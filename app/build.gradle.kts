@@ -49,6 +49,7 @@ dependencies {
 //    implementation(libs.moxy)
 //    implementation(libs.kapt)
 //    implementation(libs.moxy.compiler)
+    implementation(libs.koin)
     implementation(libs.kotlinx.serialization)
     implementation(libs.androidx.lifecycle.livedata.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
