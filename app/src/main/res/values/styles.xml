@@ -28,6 +28,8 @@
         <item name="android:textSize">@dimen/small_text_size</item>
         <item name="android:fontFamily">@font/ys_display_regular</item>
         <item name="android:textFontWeight">500</item>
+        <item name="tabTextColor">@color/icon_black</item>
+        <item name="tabIndicatorColor">@color/icon_black</item>
     </style>
 
     <style name="ImageSettings">
@@ -130,6 +132,12 @@
         <item name="android:textColor">@color/icon_black</item>
         <item name="android:textFontWeight">400</item>
         <item name="android:textSize">@dimen/small_text_size_13</item>
+    </style>
+
+    <style name="CustomTabTextStyle" parent="TextAppearance.AppCompat">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/icon_black</item>
+        <item name="android:fontFamily">@font/ys_display_medium</item>
     </style>
 
 

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:shape="rectangle">
+    <item android:gravity="center">
+        <shape>
+            <size
+                android:width="148dp"
+                android:height="2dp" />
+
+            <corners android:radius="2dp" />
+
+            <solid app:tabIndicatorColor="@color/icon_black" />
+        </shape>
+    </item>
+</layer-list>

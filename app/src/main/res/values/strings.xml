@@ -13,9 +13,14 @@
     <string name="link_eula">https://yandex.ru/legal/practicum_offer/</string>
     <string name="link_share">https://practicum.yandex.ru/android-developer//</string>
     <string name="nothing_found">Ничего не нашлось</string>
+    <string name="media_is_empty">Ваша медиатека пуста</string>
     <string name="something_went_wrong">Проблемы со связью \n
         \n
         Загрузка не удалась. Проверьте подключение к интернету</string>
+    <string name="no_playlists">Вы не создали \n
+        ни одного плейлиста</string>
+    <string name="favorite">Избранные треки</string>
+    <string name="playlists">Плейлисты</string>
     <string name="searched">Вы искали</string>
     <string name="duration">Длительность</string>
     <string name="album">Альбом</string>
