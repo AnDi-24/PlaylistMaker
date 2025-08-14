@@ -1,6 +1,6 @@
 package com.practicum.playlistmaker.search.data.impl
 
-import android.content.Context
+
 import android.content.SharedPreferences
 import androidx.core.content.edit
 import com.google.gson.Gson
@@ -9,14 +9,12 @@ import com.practicum.playlistmaker.search.domain.models.Track
 import com.practicum.playlistmaker.search.domain.repository.HistoryChangeListener
 import com.practicum.playlistmaker.search.domain.repository.SearchHistoryRepository
 
-const val SEARCH_HISTORY = "search_history"
 const val SEARCH_HISTORY_LIST_KEY = "for_search_history_list"
 const val SEARCH_HISTORY_KEY = "for_search_history"
 
-class SearchHistoryRepositoryImpl(context: Context): SearchHistoryRepository {
+class SearchHistoryRepositoryImpl(pref: SharedPreferences, private val gson: Gson): SearchHistoryRepository {
 
-    private val savedHistory = context.getSharedPreferences(SEARCH_HISTORY, Context.MODE_PRIVATE)
-    private val gson = Gson()
+    private val savedHistory = pref
     private var listener: HistoryChangeListener? = null
     private var preferenceChangeListener: SharedPreferences.OnSharedPreferenceChangeListener? = null
 

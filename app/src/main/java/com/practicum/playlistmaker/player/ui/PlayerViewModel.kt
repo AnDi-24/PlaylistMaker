@@ -7,20 +7,16 @@ import android.os.Looper
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
 import com.practicum.playlistmaker.player.ui.model.PlayerData
 import com.practicum.playlistmaker.player.ui.model.PlayerStates
 import java.util.Locale
 
-class PlayerViewModel(private val url: String): ViewModel() {
+class PlayerViewModel(private val url: String, private val mediaPlayer: MediaPlayer): ViewModel() {
 
     private val handler = Handler(Looper.getMainLooper())
     private var playerState = PlayerStates.DEFAULT
     private var timer = "00:00"
     private var timerRunnable: Runnable? = null
-    private var mediaPlayer = MediaPlayer()
     private val playerLiveData = MutableLiveData(PlayerData(PlayerStates.DEFAULT, "00:00"))
     fun observePlayer(): LiveData<PlayerData> = playerLiveData
 
@@ -90,13 +86,6 @@ class PlayerViewModel(private val url: String): ViewModel() {
     }
 
     companion object {
-
         private const val DELAY = 300L
-
-        fun getFactory(url: String): ViewModelProvider.Factory = viewModelFactory {
-            initializer {
-                PlayerViewModel(url)
-            }
-        }
     }
 }

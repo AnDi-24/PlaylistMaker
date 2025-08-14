@@ -1,24 +1,29 @@
 package com.practicum.playlistmaker.search.ui
 
-import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
-import com.practicum.playlistmaker.R
 import com.practicum.playlistmaker.search.domain.api.TracksInteractor
 import com.practicum.playlistmaker.search.domain.models.Track
-import com.practicum.playlistmaker.App
 import com.practicum.playlistmaker.search.domain.repository.HistoryChangeListener
+import com.practicum.playlistmaker.search.domain.use_case.GetListenerUseCase
+import com.practicum.playlistmaker.search.domain.use_case.GetTrackListUseCase
+import com.practicum.playlistmaker.search.domain.use_case.SaveHistoryUseCase
+import com.practicum.playlistmaker.search.domain.use_case.SaveTrackUseCase
+import com.practicum.playlistmaker.search.domain.use_case.UnregListenerSavedTrack
 import com.practicum.playlistmaker.search.ui.model.SearchState
-import com.practicum.playlistmaker.util.Creator
 import com.practicum.playlistmaker.util.SingleLiveEvent
 
-class TracksViewModel(private val context: Context): ViewModel() {
+class SearchViewModel(
+    private val loadTrack: TracksInteractor,
+    private val saveTrackUseCase: SaveTrackUseCase,
+    private val getListener: GetListenerUseCase,
+    private val unRegListener: UnregListenerSavedTrack,
+    private val saveHistory: SaveHistoryUseCase,
+    private val getTrackList: GetTrackListUseCase
+    ): ViewModel() {
 
     private val stateLiveData = MutableLiveData<SearchState>()
     fun observeState(): LiveData<SearchState> = stateLiveData
@@ -27,14 +32,10 @@ class TracksViewModel(private val context: Context): ViewModel() {
     fun observeShowToast(): LiveData<String?> = showToast
 
     private var searchRunnable: Runnable? = null
-    private val loadTrack = Creator.provideTracksInteractor(context)
     private val handler = Handler(Looper.getMainLooper())
     private var lastSearchText: String? = null
     private var latestSearchText: String? = null
     private val tracks = mutableListOf<Track>()
-    private val saveTrackUseCase = Creator.provideSaveTrack(context)
-    private val getListener = Creator.provideGetListener(context)
-    private val unRegListener = Creator.provideUnregListenerSavedTrack(context)
     private val MAX_HISTORY_SIZE = 10
 
     init {
@@ -80,8 +81,6 @@ class TracksViewModel(private val context: Context): ViewModel() {
                                 errorMessage != null -> {
                                     renderState(
                                         SearchState.Error(
-                                            context.getString(R.string.something_went_wrong),
-                                            context.getDrawable(R.drawable.went_wrong),
                                             errorMessage
                                         )
                                     )
@@ -89,10 +88,7 @@ class TracksViewModel(private val context: Context): ViewModel() {
                                 }
                                 tracks.isEmpty() -> {
                                     renderState(
-                                        SearchState.Empty(
-                                            context.getString((R.string.nothing_found)),
-                                            context.getDrawable(R.drawable.nothing)
-                                        )
+                                        SearchState.Empty
                                     )
                                 }
                                 else -> {
@@ -129,6 +125,14 @@ class TracksViewModel(private val context: Context): ViewModel() {
         showToast.postValue("Сохранено")
     }
 
+    fun saveHistoryFromAdapter(historyFromAdapter: MutableList<Track>){
+        saveHistory.execute(historyFromAdapter)
+    }
+
+    fun getTrackListFromPref(): MutableList<Track>?{
+        return getTrackList.execute()
+    }
+
     override fun onCleared(){
         handler.removeCallbacksAndMessages(SEARCH_REQUEST_TOKEN)
         if (searchRunnable != null) {
@@ -141,12 +145,5 @@ class TracksViewModel(private val context: Context): ViewModel() {
     companion object {
         private const val SEARCH_DEBOUNCE_DELAY = 2000L
         private val SEARCH_REQUEST_TOKEN = Any()
-        fun getFactory(): ViewModelProvider.Factory = viewModelFactory {
-            initializer {
-                val app =
-                    (this[ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY] as App)
-                TracksViewModel(app)
-            }
-        }
     }
 }

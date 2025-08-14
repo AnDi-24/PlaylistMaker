@@ -1,7 +1,6 @@
 package com.practicum.playlistmaker.search.ui
 
 import android.content.Intent
-import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -12,17 +11,13 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModelProvider
-import com.practicum.playlistmaker.util.Creator
 import com.practicum.playlistmaker.R
 import com.practicum.playlistmaker.databinding.ActivitySearchBinding
 import com.practicum.playlistmaker.search.domain.models.Track
-import com.practicum.playlistmaker.search.domain.api.TracksInteractor
-import com.practicum.playlistmaker.search.domain.use_case.GetTrackListUseCase
-import com.practicum.playlistmaker.search.domain.use_case.SaveHistoryUseCase
 import com.practicum.playlistmaker.player.ui.PlayerActivity
 import com.practicum.playlistmaker.search.ui.model.SearchState
 import kotlinx.serialization.json.Json
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 
 class SearchActivity : AppCompatActivity() {
@@ -32,7 +27,7 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySearchBinding
 
     private var textWatcher: TextWatcher? = null
-    private var viewModel: TracksViewModel? = null
+    private val viewModel by viewModel<SearchViewModel>()
 
     private val handler = Handler(Looper.getMainLooper())
 
@@ -40,7 +35,7 @@ class SearchActivity : AppCompatActivity() {
         val chosenTrackToString = Json.encodeToString(it)
         if (clickDebounce()) {
             startActivity(playerIntent.putExtra("chosen_Track_Key", chosenTrackToString))
-            viewModel?.saveTrackFromListener(it)
+            viewModel.saveTrackFromListener(it)
         }
     }
 
@@ -49,9 +44,6 @@ class SearchActivity : AppCompatActivity() {
         startActivity(playerIntent.putExtra("chosen_Track_Key", chosenTrackToString))
     }
 
-    private lateinit var loadTrack: TracksInteractor
-    private lateinit var getTrackListUseCase: GetTrackListUseCase
-    private lateinit var saveHistoryUseCase: SaveHistoryUseCase
     private var inputValue: String = INPUT_DEF
     lateinit var playerIntent: Intent
 
@@ -76,25 +68,21 @@ class SearchActivity : AppCompatActivity() {
 
         val inputMethodManager = getSystemService(INPUT_METHOD_SERVICE) as? InputMethodManager
 
-        loadTrack = Creator.provideTracksInteractor(this)
-        getTrackListUseCase = Creator.provideGetTrackList(this)
-        saveHistoryUseCase = Creator.provideSaveHistory(this)
+        historyAdapter.savedList = viewModel.getTrackListFromPref() ?: emptyList<Track>().toMutableList()
+
+
         playerIntent = Intent(this, PlayerActivity::class.java)
 
-        viewModel = ViewModelProvider(this, TracksViewModel.getFactory())
-            .get(TracksViewModel::class.java)
-
-        viewModel?.observeState()?.observe(this) {
+        viewModel.observeState().observe(this) {
             render(it)
         }
 
-        viewModel?.observeShowToast()?.observe(this) {
+        viewModel.observeShowToast().observe(this) {
             showToast(it)
         }
 
         val backButton = findViewById<ImageView>(R.id.button_back)
 
-        historyAdapter.savedList = getTrackListUseCase.execute() ?: emptyList<Track>().toMutableList()
 
         backButton.setOnClickListener {
             finish()
@@ -105,7 +93,7 @@ class SearchActivity : AppCompatActivity() {
         binding.inputEditText.setText(inputValue)
 
         binding.refreshButton.setOnClickListener {
-            viewModel?.requestState(binding.inputEditText.toString())
+            viewModel.requestState(binding.inputEditText.toString())
             binding.refreshButton.visibility = View.GONE
         }
 
@@ -123,7 +111,7 @@ class SearchActivity : AppCompatActivity() {
 
         binding.clearIcon.setOnClickListener {
             binding.inputEditText.setText("")
-            viewModel?.clearButton()
+            viewModel.clearButton()
             inputMethodManager?.hideSoftInputFromWindow(binding.clearIcon.windowToken, 0)
         }
 
@@ -139,7 +127,7 @@ class SearchActivity : AppCompatActivity() {
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
 
-                viewModel?.searchDebounce(changedText = s?.toString() ?: "")
+                viewModel.searchDebounce(changedText = s?.toString() ?: "")
 
                 binding.historyView.visibility =
                     if (binding.inputEditText.hasFocus() && s?.isEmpty() == true) View.VISIBLE else View.GONE
@@ -147,7 +135,7 @@ class SearchActivity : AppCompatActivity() {
                 binding.rvTrack.visibility = if (binding.inputEditText.text.isEmpty()) View.GONE else View.VISIBLE
 
                 if (binding.inputEditText.text.isEmpty()) {
-                    viewModel?.clearTracks()
+                    viewModel.clearTracks()
                 }
 
                 binding.clearIcon.visibility = clearButtonVisibility(s)
@@ -173,7 +161,7 @@ class SearchActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         textWatcher?.let { binding.inputEditText.removeTextChangedListener(it) }
-        saveHistoryUseCase.execute(historyAdapter.savedList)
+        viewModel.saveHistoryFromAdapter(historyAdapter.savedList)
     }
 
     private fun clickDebounce(): Boolean {
@@ -216,25 +204,25 @@ class SearchActivity : AppCompatActivity() {
         }
     }
 
-    fun showEmpty(emptyMessage: String, icon: Drawable?) {
+    fun showEmpty() {
         binding.placeholderMessage.visibility = View.VISIBLE
         binding.placeholderNotFound.visibility = View.VISIBLE
-        viewModel?.clearTracks()
+        viewModel.clearTracks()
         trackAdapter.savedList.clear()
         trackAdapter.notifyDataSetChanged()
-        binding.placeholderMessage.text = emptyMessage
-        binding.placeholderNotFound.setImageDrawable(icon)
+        binding.placeholderMessage.text = getString(R.string.nothing_found)
+        binding.placeholderNotFound.setImageDrawable(getDrawable(R.drawable.nothing))
     }
 
-    fun showError(errorMessage: String, icon: Drawable?) {
+    fun showError() {
         binding.placeholderMessage.visibility = View.VISIBLE
         binding.placeholderNotFound.visibility = View.VISIBLE
-        viewModel?.clearTracks()
+        viewModel.clearTracks()
         trackAdapter.savedList.clear()
         trackAdapter.notifyDataSetChanged()
         binding.apply {
-            placeholderMessage.text = errorMessage
-            placeholderNotFound.setImageDrawable(icon)
+            placeholderMessage.text = getString(R.string.something_went_wrong)
+            placeholderNotFound.setImageDrawable(getDrawable(R.drawable.went_wrong))
             refreshButton.visibility = View.VISIBLE
             refreshButton.setImageDrawable(getDrawable(R.drawable.refresh_button))
         }
@@ -249,17 +237,15 @@ class SearchActivity : AppCompatActivity() {
         historyAdapter.notifyDataSetChanged()
         historyAdapter.savedList.add(0, track)
         historyAdapter.notifyDataSetChanged()
-        viewModel?.cleanHistory(historyAdapter.savedList.size)
+        viewModel.cleanHistory(historyAdapter.savedList.size)
         historyAdapter.notifyDataSetChanged()
     }
-
-
 
     fun render(state: SearchState) {
         when(state) {
             is SearchState.Loading -> showLoading()
-            is SearchState.Error -> showError(state.errorMessage, state.icon)
-            is SearchState.Empty -> showEmpty(state.emptyMessage, state.icon)
+            is SearchState.Error -> showError()
+            is SearchState.Empty -> showEmpty()
             is SearchState.Content ->showContent(state.tracks)
             is SearchState.HistoryActions -> historyActions(state.track)
             is SearchState.RemoveAt -> removeAt(state.position)
