@@ -18,6 +18,8 @@ lifecycleRuntimeKtx = "2.9.2"
 #moxyVersion = "2.2.2"
 kotlinSerJson = "1.9.0"
 koinVersion = "4.1.0"
+fragment_version = "1.8.8"
+viewpager2 = "1.1.0"
 [libraries]
 
 #kapt = {module = "com.github.moxy-community:moxy-compiler", version.ref ="moxyVersion"}
@@ -40,6 +42,8 @@ retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit
 retrofit2-converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson"}
 kotlinx-serialization = {module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinSerJson" }
 koin = {module = "io.insert-koin:koin-android", version.ref = "koinVersion"}
+androidx-fragment ={group= "androidx.fragment", name = "fragment-ktx", version.ref = "fragment_version"}
+andtoidx-viewPager = {group = "androidx.viewpager2", name = "viewpager2", version.ref = "viewpager2"}
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

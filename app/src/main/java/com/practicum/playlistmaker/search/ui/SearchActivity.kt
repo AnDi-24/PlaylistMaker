@@ -81,10 +81,7 @@ class SearchActivity : AppCompatActivity() {
             showToast(it)
         }
 
-        val backButton = findViewById<ImageView>(R.id.button_back)
-
-
-        backButton.setOnClickListener {
+        binding.buttonBack.setOnClickListener {
             finish()
         }
 
