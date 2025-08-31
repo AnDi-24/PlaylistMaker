@@ -1,30 +1,32 @@
 package com.practicum.playlistmaker.search.ui
 
+import android.content.Context.INPUT_METHOD_SERVICE
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
-import android.widget.ImageView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.content.res.AppCompatResources.getDrawable
+import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import com.practicum.playlistmaker.R
-import com.practicum.playlistmaker.databinding.ActivitySearchBinding
+import com.practicum.playlistmaker.databinding.FragmentSearchBinding
+import com.practicum.playlistmaker.player.ui.PlayerFragment
 import com.practicum.playlistmaker.search.domain.models.Track
-import com.practicum.playlistmaker.player.ui.PlayerActivity
 import com.practicum.playlistmaker.search.ui.model.SearchState
 import kotlinx.serialization.json.Json
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import kotlin.getValue
 
-
-class SearchActivity : AppCompatActivity() {
+class SearchFragment : Fragment() {
 
     private var isClickAllowed = true
-
-    private lateinit var binding: ActivitySearchBinding
 
     private var textWatcher: TextWatcher? = null
     private val viewModel by viewModel<SearchViewModel>()
@@ -34,14 +36,16 @@ class SearchActivity : AppCompatActivity() {
     private val trackAdapter = TrackAdapter {
         val chosenTrackToString = Json.encodeToString(it)
         if (clickDebounce()) {
-            startActivity(playerIntent.putExtra("chosen_Track_Key", chosenTrackToString))
             viewModel.saveTrackFromListener(it)
+            findNavController().navigate(R.id.action_searchFragment_to_playerFragment,
+                PlayerFragment.createArgs(chosenTrackToString))
         }
     }
 
     private var historyAdapter = TrackAdapter {
         val chosenTrackToString = Json.encodeToString(it)
-        startActivity(playerIntent.putExtra("chosen_Track_Key", chosenTrackToString))
+        findNavController().navigate(R.id.action_searchFragment_to_playerFragment,
+            PlayerFragment.createArgs(chosenTrackToString))
     }
 
     private var inputValue: String = INPUT_DEF
@@ -52,37 +56,34 @@ class SearchActivity : AppCompatActivity() {
         outState.putString(INPUT_STATE, inputValue)
     }
 
-    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-        super.onRestoreInstanceState(savedInstanceState)
-        inputValue = savedInstanceState.getString(
-            INPUT_STATE,
-            INPUT_DEF
-        )
+    private lateinit var binding: FragmentSearchBinding
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        binding = FragmentSearchBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_search)
-        binding = ActivitySearchBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
-        val inputMethodManager = getSystemService(INPUT_METHOD_SERVICE) as? InputMethodManager
+        val inputMethodManager = requireActivity().getSystemService(INPUT_METHOD_SERVICE) as? InputMethodManager
 
-        historyAdapter.savedList = viewModel.getTrackListFromPref() ?: emptyList<Track>().toMutableList()
+        historyAdapter.savedList =
+            viewModel.getTrackListFromPref() ?: emptyList<Track>().toMutableList()
 
 
-        playerIntent = Intent(this, PlayerActivity::class.java)
+        playerIntent = Intent(requireContext(), PlayerFragment::class.java)
 
-        viewModel.observeState().observe(this) {
+        viewModel.observeState().observe(viewLifecycleOwner) {
             render(it)
         }
 
-        viewModel.observeShowToast().observe(this) {
+        viewModel.observeShowToast().observe(viewLifecycleOwner) {
             showToast(it)
-        }
-
-        binding.buttonBack.setOnClickListener {
-            finish()
         }
 
         binding.rvTrack.adapter = trackAdapter
@@ -92,12 +93,6 @@ class SearchActivity : AppCompatActivity() {
         binding.refreshButton.setOnClickListener {
             viewModel.requestState(binding.inputEditText.toString())
             binding.refreshButton.visibility = View.GONE
-        }
-
-        binding.clearHistoryButton.setOnClickListener {
-            historyAdapter.savedList.clear()
-            historyAdapter.notifyDataSetChanged()
-            binding.historyView.visibility = View.GONE
         }
 
         binding.clearHistoryButton.setOnClickListener {
@@ -129,7 +124,8 @@ class SearchActivity : AppCompatActivity() {
                 binding.historyView.visibility =
                     if (binding.inputEditText.hasFocus() && s?.isEmpty() == true) View.VISIBLE else View.GONE
 
-                binding.rvTrack.visibility = if (binding.inputEditText.text.isEmpty()) View.GONE else View.VISIBLE
+                binding.rvTrack.visibility =
+                    if (binding.inputEditText.text.isEmpty()) View.GONE else View.VISIBLE
 
                 if (binding.inputEditText.text.isEmpty()) {
                     viewModel.clearTracks()
@@ -155,8 +151,8 @@ class SearchActivity : AppCompatActivity() {
 
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onDestroyView() {
+        super.onDestroyView()
         textWatcher?.let { binding.inputEditText.removeTextChangedListener(it) }
         viewModel.saveHistoryFromAdapter(historyAdapter.savedList)
     }
@@ -208,7 +204,7 @@ class SearchActivity : AppCompatActivity() {
         trackAdapter.savedList.clear()
         trackAdapter.notifyDataSetChanged()
         binding.placeholderMessage.text = getString(R.string.nothing_found)
-        binding.placeholderNotFound.setImageDrawable(getDrawable(R.drawable.nothing))
+        binding.placeholderNotFound.setImageDrawable(getDrawable(requireContext(), R.drawable.nothing))
     }
 
     fun showError() {
@@ -219,17 +215,18 @@ class SearchActivity : AppCompatActivity() {
         trackAdapter.notifyDataSetChanged()
         binding.apply {
             placeholderMessage.text = getString(R.string.something_went_wrong)
-            placeholderNotFound.setImageDrawable(getDrawable(R.drawable.went_wrong))
+            placeholderNotFound.setImageDrawable(getDrawable(requireContext(),R.drawable.went_wrong))
             refreshButton.visibility = View.VISIBLE
-            refreshButton.setImageDrawable(getDrawable(R.drawable.refresh_button))
+            refreshButton.setImageDrawable(getDrawable(requireContext(),R.drawable.refresh_button))
         }
     }
 
-    fun removeAt(position: Int){
+    fun removeAt(position: Int) {
         historyAdapter.savedList.removeAt(position)
         historyAdapter.notifyDataSetChanged()
     }
-    fun historyActions(track: Track){
+
+    fun historyActions(track: Track) {
         historyAdapter.savedList.remove(track)
         historyAdapter.notifyDataSetChanged()
         historyAdapter.savedList.add(0, track)
@@ -239,18 +236,18 @@ class SearchActivity : AppCompatActivity() {
     }
 
     fun render(state: SearchState) {
-        when(state) {
+        when (state) {
             is SearchState.Loading -> showLoading()
             is SearchState.Error -> showError()
             is SearchState.Empty -> showEmpty()
-            is SearchState.Content ->showContent(state.tracks)
+            is SearchState.Content -> showContent(state.tracks)
             is SearchState.HistoryActions -> historyActions(state.track)
             is SearchState.RemoveAt -> removeAt(state.position)
         }
     }
 
     fun showToast(text: String?) {
-        Toast.makeText(this, text, Toast.LENGTH_SHORT)
+        Toast.makeText(requireContext(), text, Toast.LENGTH_SHORT)
             .show()
     }
 
@@ -260,3 +257,4 @@ class SearchActivity : AppCompatActivity() {
         private const val INPUT_DEF = ""
     }
 }
+
