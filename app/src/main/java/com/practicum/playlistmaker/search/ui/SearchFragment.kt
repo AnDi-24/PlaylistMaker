@@ -3,8 +3,6 @@ package com.practicum.playlistmaker.search.ui
 import android.content.Context.INPUT_METHOD_SERVICE
 import android.content.Intent
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
@@ -14,32 +12,27 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.appcompat.content.res.AppCompatResources.getDrawable
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.practicum.playlistmaker.R
 import com.practicum.playlistmaker.databinding.FragmentSearchBinding
 import com.practicum.playlistmaker.player.ui.PlayerFragment
 import com.practicum.playlistmaker.search.domain.models.Track
 import com.practicum.playlistmaker.search.ui.model.SearchState
+import com.practicum.playlistmaker.util.debounce
 import kotlinx.serialization.json.Json
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import kotlin.getValue
 
 class SearchFragment : Fragment() {
 
-    private var isClickAllowed = true
-
     private var textWatcher: TextWatcher? = null
     private val viewModel by viewModel<SearchViewModel>()
 
-    private val handler = Handler(Looper.getMainLooper())
+    private lateinit var onTrackClickDebounce: (Track) -> Unit
 
     private val trackAdapter = TrackAdapter {
-        val chosenTrackToString = Json.encodeToString(it)
-        if (clickDebounce()) {
-            viewModel.saveTrackFromListener(it)
-            findNavController().navigate(R.id.action_searchFragment_to_playerFragment,
-                PlayerFragment.createArgs(chosenTrackToString))
-        }
+        onTrackClickDebounce(it)
     }
 
     private var historyAdapter = TrackAdapter {
@@ -56,19 +49,27 @@ class SearchFragment : Fragment() {
         outState.putString(INPUT_STATE, inputValue)
     }
 
-    private lateinit var binding: FragmentSearchBinding
+    private var _binding: FragmentSearchBinding? = null
+    private val binding get() =_binding!!
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        binding = FragmentSearchBinding.inflate(inflater, container, false)
+        _binding = FragmentSearchBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        onTrackClickDebounce = debounce<Track>(CLICK_DEBOUNCE_DELAY, viewLifecycleOwner.lifecycleScope, false) { track ->
+            viewModel.saveTrackFromListener(track)
+            val chosenTrackToString = Json.encodeToString(track)
+            findNavController().navigate(R.id.action_searchFragment_to_playerFragment,
+                PlayerFragment.createArgs(chosenTrackToString))
+        }
 
         val inputMethodManager = requireActivity().getSystemService(INPUT_METHOD_SERVICE) as? InputMethodManager
 
@@ -155,15 +156,7 @@ class SearchFragment : Fragment() {
         super.onDestroyView()
         textWatcher?.let { binding.inputEditText.removeTextChangedListener(it) }
         viewModel.saveHistoryFromAdapter(historyAdapter.savedList)
-    }
-
-    private fun clickDebounce(): Boolean {
-        val current = isClickAllowed
-        if (isClickAllowed) {
-            isClickAllowed = false
-            handler.postDelayed({ isClickAllowed = true }, CLICK_DEBOUNCE_DELAY)
-        }
-        return current
+        _binding = null
     }
 
     private fun clearButtonVisibility(s: CharSequence?): Int {
@@ -252,7 +245,7 @@ class SearchFragment : Fragment() {
     }
 
     companion object {
-        private const val CLICK_DEBOUNCE_DELAY = 1000L
+        private const val CLICK_DEBOUNCE_DELAY = 100L
         private const val INPUT_STATE = "INPUT_STATE"
         private const val INPUT_DEF = ""
     }

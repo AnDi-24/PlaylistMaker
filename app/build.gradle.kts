@@ -49,6 +49,7 @@ dependencies {
 //    implementation(libs.moxy)
 //    implementation(libs.kapt)
 //    implementation(libs.moxy.compiler)
+    implementation(libs.kotlinx.coroutines)
     implementation(libs.androidx.fragment)
     implementation(libs.androidx.fragment)
     implementation(libs.andtoidx.viewPager)
