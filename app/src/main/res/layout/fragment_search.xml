@@ -7,27 +7,18 @@
     android:orientation="vertical"
     android:fitsSystemWindows="true"
     style="@style/FrameSettings"
-    >
+    android:animateLayoutChanges="true"
+    tools:context="com.practicum.playlistmaker.search.ui.SearchFragment">
 
     <FrameLayout
         style="@style/FrameSettings"
         android:layout_height="56dp"
         android:layout_weight="0">
 
-        <ImageView
-            android:id="@+id/button_back"
-            style="@style/ImageSettings"
-            android:src="@drawable/back"
-            android:layout_gravity="start|center"
-            android:layout_marginStart="4dp"
-            android:layout_marginTop="4dp"
-            android:layout_marginBottom="4dp"
-            android:foreground="?attr/selectableItemBackground" />
-
         <TextView
             style="@style/TextSettings"
             android:fontFamily="@font/ys_display_medium"
-            android:layout_marginStart="64dp"
+            android:layout_marginStart="@dimen/sixteen_layout"
             android:text="@string/button_search"
             android:textSize="@dimen/primary_text_size" />
 
