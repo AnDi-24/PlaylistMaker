@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
@@ -22,7 +23,8 @@ import kotlin.getValue
 
 class PlayerFragment : Fragment() {
 
-    private lateinit var binding: FragmentPlayerBinding
+    private var _binding: FragmentPlayerBinding? = null
+    private val binding get() = _binding!!
 
     private val viewModel: PlayerViewModel by viewModel()
 
@@ -31,7 +33,7 @@ class PlayerFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        binding = FragmentPlayerBinding.inflate(inflater, container, false)
+        _binding = FragmentPlayerBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -46,17 +48,18 @@ class PlayerFragment : Fragment() {
         viewModel.observePlayer().observe(viewLifecycleOwner){
             if (it.playerState == PlayerStates.PLAYING){
                 binding.apply {
-                    playButton.visibility = View.GONE
-                    pauseButton.visibility = View.VISIBLE
+                    playButton.isVisible = false
+                    pauseButton.isVisible = true
                     pauseButton.isEnabled = true
-                }}
+                }
+            }
         }
 
         viewModel.observePlayer().observe(viewLifecycleOwner){
             if (it.playerState == PlayerStates.PAUSED){
                 binding.apply {
-                    playButton.visibility = View.VISIBLE
-                    pauseButton.visibility = View.GONE
+                    playButton.isVisible = true
+                    pauseButton.isVisible = false
                 }}
         }
 
@@ -64,8 +67,8 @@ class PlayerFragment : Fragment() {
             if (it.playerState == PlayerStates.PREPARED){
                 binding.apply {
                     playButton.isEnabled = true
-                    playButton.visibility = View.VISIBLE
-                    pauseButton.visibility = View.GONE
+                    playButton.isVisible = true
+                    pauseButton.isVisible = false
                 }
             }
         }
@@ -92,6 +95,11 @@ class PlayerFragment : Fragment() {
     override fun onPause() {
         super.onPause()
         viewModel.pausePlayer()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     fun bind(item: Track){
