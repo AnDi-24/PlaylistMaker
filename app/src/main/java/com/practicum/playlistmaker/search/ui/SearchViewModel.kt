@@ -32,7 +32,10 @@ class SearchViewModel(
     private val showToast = SingleLiveEvent<String?>()
     fun observeShowToast(): LiveData<String?> = showToast
 
-    private val trackSearchDebounce = debounce<String>(SEARCH_DEBOUNCE_DELAY, viewModelScope, true) { changedText ->
+    private val trackSearchDebounce = debounce<String>(
+        SEARCH_DEBOUNCE_DELAY,
+        viewModelScope,
+        true) { changedText ->
         requestState(changedText)
     }
 
@@ -43,10 +46,9 @@ class SearchViewModel(
     init {
         getListener.execute(object : HistoryChangeListener {
             override fun onHistoryUpdated(track: Track?) {
-                if(track != null){
+                if(track != null) {
                     renderState(
                         SearchState.HistoryActions(track))}
-                showToast.postValue("Сохранено")
             }
         })
     }
@@ -120,7 +122,6 @@ class SearchViewModel(
         if (historySize > MAX_HISTORY_SIZE){
             renderState(
                 SearchState.RemoveAt(MAX_HISTORY_SIZE))}
-        showToast.postValue("Сохранено")
     }
 
     fun saveHistoryFromAdapter(historyFromAdapter: MutableList<Track>){

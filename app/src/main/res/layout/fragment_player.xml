@@ -126,7 +126,7 @@
                 android:layout_marginEnd="@dimen/dp_8"
                 android:background="@android:color/transparent"
                 android:contentDescription="@string/like"
-                android:src="@drawable/like"
+                android:src="@drawable/unlike"
                 app:layout_constraintEnd_toStartOf="@id/right_guideline"
                 app:layout_constraintStart_toEndOf="@id/play_button"
                 app:layout_constraintTop_toTopOf="@id/add_button" />

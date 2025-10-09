@@ -6,6 +6,7 @@ plugins {
     id("kotlin-parcelize")
     id("kotlin-kapt")
     id("kotlinx-serialization")
+//    id("com.google.devtools.ksp")
 
 }
 
@@ -22,6 +23,8 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
+
+//    configurations { implementation.get().exclude(mapOf("group" to "org.jetbrains", "module" to "annotations")) }
 
     buildTypes {
         release {
@@ -49,8 +52,13 @@ dependencies {
 //    implementation(libs.moxy)
 //    implementation(libs.kapt)
 //    implementation(libs.moxy.compiler)
+    implementation(libs.androidx.room)
+    kapt(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.ktx)
+//    implementation(libs.androidx.room)
+//    implementation(libs.androidx.room.ktx)
+//    implementation(libs.androidx.room.compiler)
     implementation(libs.kotlinx.coroutines)
-    implementation(libs.androidx.fragment)
     implementation(libs.androidx.fragment)
     implementation(libs.andtoidx.viewPager)
     implementation(libs.koin)
