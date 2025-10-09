@@ -1,3 +1,6 @@
 package com.practicum.playlistmaker.player.ui.model
 
-data class PlayerData(val playerState: PlayerStates, val timer: String)
+data class PlayerData(
+    val playerState: PlayerStates,
+    val timer: String,
+    val isFavorite: Boolean)

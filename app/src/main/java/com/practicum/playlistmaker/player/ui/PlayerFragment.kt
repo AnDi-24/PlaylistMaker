@@ -17,7 +17,6 @@ import com.practicum.playlistmaker.R
 import com.practicum.playlistmaker.databinding.FragmentPlayerBinding
 import com.practicum.playlistmaker.player.ui.model.PlayerStates
 import com.practicum.playlistmaker.search.domain.models.Track
-import com.practicum.playlistmaker.util.SingleLiveEvent
 import kotlinx.serialization.json.Json
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
@@ -29,7 +28,6 @@ class PlayerFragment : Fragment() {
     private var _binding: FragmentPlayerBinding? = null
     private val binding get() = _binding!!
     private val viewModel: PlayerViewModel by viewModel()
-    private val showToast = SingleLiveEvent<String?>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -78,8 +76,8 @@ class PlayerFragment : Fragment() {
             }
         }
 
-        viewModel.observeFavorite().observe(viewLifecycleOwner){
-            likeCheck(it)
+        viewModel.observePlayer().observe(viewLifecycleOwner){
+            likeCheck(it.isFavorite)
         }
 
         viewModel.observePlayer().observe(viewLifecycleOwner){
@@ -100,7 +98,15 @@ class PlayerFragment : Fragment() {
 
         binding.likeButton.setOnClickListener {
             viewModel.onFavoriteClicked(chosenTrack)
-            showToast.postValue(getString(R.string.add_to_favorite))
+            if (chosenTrack.isFavorite){
+                Toast.makeText(context,
+                    R.string.add_to_favorite,
+                    Toast.LENGTH_SHORT).show()
+            }else{
+                Toast.makeText(context,
+                    R.string.remove_from_favorite,
+                    Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -133,8 +139,8 @@ class PlayerFragment : Fragment() {
             albumName.text = item.collectionName
             progress.text = getString(R.string.time_example)
             if(item.isFavorite){
-                likeButton.setImageDrawable(
-                    getDrawable(requireContext(),
+                likeButton.setImageDrawable(getDrawable(
+                    requireContext(),
                     R.drawable.like))
             }else{
                 likeButton.setImageDrawable(getDrawable(
@@ -147,21 +153,16 @@ class PlayerFragment : Fragment() {
     fun likeCheck(item: Boolean){
         binding.apply{
             if(item){
-                likeButton.setImageDrawable(
-                    getDrawable(requireContext(),
+                likeButton.setImageDrawable(getDrawable(
+                        requireContext(),
                         R.drawable.like))
-                Toast.makeText(context,
-                    R.string.add_to_favorite,
-                    Toast.LENGTH_SHORT).show()
             }else{
-                likeButton.setImageDrawable(getDrawable(requireContext(),
+                likeButton.setImageDrawable(getDrawable(
+                    requireContext(),
                     R.drawable.unlike))
-                Toast.makeText(context,
-                    R.string.remove_from_favorite,
-                    Toast.LENGTH_SHORT).show()
+            }
         }
     }
-        }
 
     companion object{
 

@@ -159,6 +159,12 @@ class SearchFragment : Fragment() {
         _binding = null
     }
 
+    override fun onResume() {
+        super.onResume()
+        val query = binding.inputEditText.text.toString()
+        viewModel.requestState(query)
+    }
+
     private fun clearButtonVisibility(s: CharSequence?): Int {
         return if (s.isNullOrEmpty()) {
             View.GONE

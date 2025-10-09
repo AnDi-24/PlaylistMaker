@@ -23,10 +23,8 @@ class PlayerViewModel(private val track: Track,
     private var playerState = PlayerStates.DEFAULT
     private var timerJob: Job? = null
     private var timer = "00:00"
-    private val playerLiveData = MutableLiveData(PlayerData(PlayerStates.DEFAULT, timer))
+    private val playerLiveData = MutableLiveData(PlayerData(PlayerStates.DEFAULT, timer, track.isFavorite))
     fun observePlayer(): LiveData<PlayerData> = playerLiveData
-    private val favoriteLiveData = MutableLiveData<Boolean>()
-    fun observeFavorite(): LiveData<Boolean> = favoriteLiveData
 
     init {
         preparePlayer()
@@ -46,16 +44,14 @@ class PlayerViewModel(private val track: Track,
         mediaPlayer.setOnCompletionListener {
             timerJob?.cancel()
             playerState = PlayerStates.PREPARED
-            playerLiveData.postValue(PlayerData(PlayerStates.PREPARED, timer))
+            playerLiveData.postValue(PlayerData(PlayerStates.PREPARED, timer, track.isFavorite))
         }
     }
 
     private fun startPlayer() {
         mediaPlayer.start()
         playerState = PlayerStates.PLAYING
-        playerLiveData.postValue(
-            PlayerData(PlayerStates.PLAYING,
-            getCurrentPlayerPosition()))
+        playerLiveData.postValue(PlayerData(PlayerStates.PLAYING, getCurrentPlayerPosition(), track.isFavorite))
         updateTimer()
     }
 
@@ -63,10 +59,7 @@ class PlayerViewModel(private val track: Track,
         mediaPlayer.pause()
         timerJob?.cancel()
         playerState = PlayerStates.PAUSED
-        playerLiveData.postValue(
-            PlayerData(
-                PlayerStates.PAUSED,
-                getCurrentPlayerPosition()))
+        playerLiveData.postValue(PlayerData(PlayerStates.PAUSED, getCurrentPlayerPosition(), track.isFavorite))
     }
 
     fun playbackControl() {
@@ -89,9 +82,7 @@ class PlayerViewModel(private val track: Track,
         timerJob = viewModelScope.launch {
             while (mediaPlayer.isPlaying) {
                 delay(DELAY)
-                playerLiveData.postValue(
-                    PlayerData(PlayerStates.PLAYING,
-                    getCurrentPlayerPosition()))
+                playerLiveData.postValue(PlayerData(PlayerStates.PLAYING, getCurrentPlayerPosition(), track.isFavorite))
             }
         }
     }
@@ -105,11 +96,13 @@ class PlayerViewModel(private val track: Track,
             if (!track.isFavorite) {
                 favoritesInteractor.addTrack(track)
                 track.isFavorite = true
-                favoriteLiveData.postValue(true)
+                playerLiveData.postValue(PlayerData(playerState, getCurrentPlayerPosition(), true))
+
+
             }else{
                 favoritesInteractor.removeTrack(track)
                 track.isFavorite = false
-                favoriteLiveData.postValue(false)
+                playerLiveData.postValue(PlayerData(playerState, getCurrentPlayerPosition(), false))
             }
         }
     }
