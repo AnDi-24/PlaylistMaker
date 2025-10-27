@@ -4,6 +4,8 @@ import android.content.Context
 import android.media.MediaPlayer
 import androidx.room.Room
 import com.google.gson.Gson
+import com.practicum.playlistmaker.media.data.impl.PlaylistRepositoryImpl
+import com.practicum.playlistmaker.media.domain.db.PlaylistRepository
 import com.practicum.playlistmaker.search.data.NetworkClient
 import com.practicum.playlistmaker.search.data.db.AppDatabase
 import com.practicum.playlistmaker.search.data.impl.FavoriteRepositoryImpl
@@ -48,6 +50,10 @@ val dataModule = module {
 
     single<FavoriteRepository>{
         FavoriteRepositoryImpl(get(),get())
+    }
+
+    single <PlaylistRepository>{
+        PlaylistRepositoryImpl(get(), get(), get())
     }
 
     single<NetworkClient> {

@@ -11,6 +11,9 @@
     <color name="track_white">#E6E8EB</color>
     <color name="primary">#1A1B22</color>
     <color name="secondary">#FFFFFFFF</color>
+    <color name="bottom_sheet_primary">#E6E8EB</color>
+    <color name="edit_text_frame">#AEAFB4</color>
+
 </resources>
 
 

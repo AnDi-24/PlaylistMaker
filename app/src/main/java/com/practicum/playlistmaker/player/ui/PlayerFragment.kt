@@ -13,8 +13,11 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.practicum.playlistmaker.R
 import com.practicum.playlistmaker.databinding.FragmentPlayerBinding
+import com.practicum.playlistmaker.media.domain.models.Playlist
+import com.practicum.playlistmaker.media.ui.PlaylistBottomSheetAdapter
 import com.practicum.playlistmaker.player.ui.model.PlayerStates
 import com.practicum.playlistmaker.search.domain.models.Track
 import kotlinx.serialization.json.Json
@@ -29,6 +32,16 @@ class PlayerFragment : Fragment() {
     private val binding get() = _binding!!
     private val viewModel: PlayerViewModel by viewModel()
 
+    private val playlistBottomSheetAdapter = PlaylistBottomSheetAdapter{
+        val message = viewModel.compareIds(it)
+        if (message){
+            Toast.makeText( context,"Добавлено в плейлист ${it.title}", Toast.LENGTH_SHORT).show()
+            hideBottomSheet()
+        }else{
+            Toast.makeText( context,"Трек уже добавлен в плейлист ${it.title}", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -40,6 +53,15 @@ class PlayerFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        binding.rvPlaylist.adapter = playlistBottomSheetAdapter
+
+        val bottomSheetContainer = binding.playlistsBottomSheet
+
+        val bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetContainer).apply {
+            state = BottomSheetBehavior.STATE_HIDDEN}
+
+        val overlay = binding.overlay
 
         val chosenTrack: Track = Json.decodeFromString(requireArguments().getSerializable("chosen_Track_Key").toString())
 
@@ -108,6 +130,35 @@ class PlayerFragment : Fragment() {
                     Toast.LENGTH_SHORT).show()
             }
         }
+
+        binding.addButton.setOnClickListener {
+            bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+        }
+
+        bottomSheetBehavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+            override fun onStateChanged(bottomSheet: View, newState: Int) {
+                when (newState) {
+
+                    BottomSheetBehavior.STATE_HIDDEN -> {
+                        refreshBottomSheet()
+                        overlay.visibility = View.GONE
+                    }
+                    BottomSheetBehavior.STATE_COLLAPSED -> {
+                        overlay.visibility = View.VISIBLE
+                        refreshBottomSheet()
+                    }
+                    else -> {
+                        overlay.visibility = View.VISIBLE
+
+                    }
+                }
+            }
+            override fun onSlide(bottomSheet: View, slideOffset: Float) {}
+        })
+
+        binding.newPlaylist.setOnClickListener {
+            findNavController().navigate(R.id.action_playerFragment_to_newPlaylistFragment)
+        }
     }
 
     override fun onPause() {
@@ -119,6 +170,11 @@ class PlayerFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    override fun onResume() {
+        super.onResume()
+        refreshBottomSheet()
     }
 
     fun bind(item: Track){
@@ -150,6 +206,7 @@ class PlayerFragment : Fragment() {
         }
     }
 
+
     fun likeCheck(item: Boolean){
         binding.apply{
             if(item){
@@ -161,6 +218,20 @@ class PlayerFragment : Fragment() {
                     requireContext(),
                     R.drawable.unlike))
             }
+        }
+    }
+
+    private fun hideBottomSheet() {
+        BottomSheetBehavior.from(binding.playlistsBottomSheet).apply {
+            state = BottomSheetBehavior.STATE_HIDDEN
+        }
+    }
+
+    fun refreshBottomSheet(){
+        viewModel.interactor()
+        viewModel.dataList.observe(viewLifecycleOwner){
+            playlistBottomSheetAdapter.playlists = it as MutableList<Playlist>
+            binding.rvPlaylist.adapter?.notifyDataSetChanged()
         }
     }
 
