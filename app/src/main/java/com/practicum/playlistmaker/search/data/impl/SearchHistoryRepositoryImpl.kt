@@ -5,18 +5,24 @@ import android.content.SharedPreferences
 import androidx.core.content.edit
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.practicum.playlistmaker.search.data.db.AppDatabase
 import com.practicum.playlistmaker.search.domain.models.Track
 import com.practicum.playlistmaker.search.domain.repository.HistoryChangeListener
 import com.practicum.playlistmaker.search.domain.repository.SearchHistoryRepository
-
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 const val SEARCH_HISTORY_LIST_KEY = "for_search_history_list"
 const val SEARCH_HISTORY_KEY = "for_search_history"
 
-class SearchHistoryRepositoryImpl(pref: SharedPreferences, private val gson: Gson): SearchHistoryRepository {
+class SearchHistoryRepositoryImpl(pref: SharedPreferences,
+                                  private val gson: Gson,
+                                  private val appDatabase: AppDatabase): SearchHistoryRepository {
 
     private val savedHistory = pref
     private var listener: HistoryChangeListener? = null
     private var preferenceChangeListener: SharedPreferences.OnSharedPreferenceChangeListener? = null
+    private val scope = CoroutineScope(Job())
 
     override fun registerListener(listener: HistoryChangeListener) {
         this.listener = listener
@@ -28,6 +34,7 @@ class SearchHistoryRepositoryImpl(pref: SharedPreferences, private val gson: Gso
         listener = null
         preferenceChangeListener = null
     }
+
     private fun initPreferenceChangeListener() {
         preferenceChangeListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
             if (key == "for_search_history") {
@@ -76,6 +83,14 @@ class SearchHistoryRepositoryImpl(pref: SharedPreferences, private val gson: Gso
 
     override fun getTrackList(): MutableList<Track>? {
         val tracksH = savedHistory.getString(SEARCH_HISTORY_LIST_KEY, null)
-        return tracksH?.let { createTracksListFromJson(it) }
+        val _tracksH = tracksH?.let { createTracksListFromJson(it) }
+        scope.launch {
+            val favoritesId = appDatabase.trackDao().getTracksId()
+            _tracksH?.map { track ->
+                track.isFavorite = track.trackId in favoritesId
+                track
+            }
+        }
+        return _tracksH
     }
 }

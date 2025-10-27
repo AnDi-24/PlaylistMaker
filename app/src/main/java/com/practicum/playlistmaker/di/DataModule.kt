@@ -2,11 +2,15 @@ package com.practicum.playlistmaker.di
 
 import android.content.Context
 import android.media.MediaPlayer
+import androidx.room.Room
 import com.google.gson.Gson
 import com.practicum.playlistmaker.search.data.NetworkClient
+import com.practicum.playlistmaker.search.data.db.AppDatabase
+import com.practicum.playlistmaker.search.data.impl.FavoriteRepositoryImpl
 import com.practicum.playlistmaker.search.data.impl.SearchHistoryRepositoryImpl
 import com.practicum.playlistmaker.search.data.network.RetrofitNetworkClient
 import com.practicum.playlistmaker.search.data.network.iTunesApi
+import com.practicum.playlistmaker.search.domain.db.FavoriteRepository
 import com.practicum.playlistmaker.search.domain.repository.SearchHistoryRepository
 import com.practicum.playlistmaker.settings.data.impl.ThemePreferencesImpl
 import com.practicum.playlistmaker.settings.domain.repository.ThemePreferences
@@ -30,10 +34,20 @@ val dataModule = module {
             .getSharedPreferences("SEARCH_HISTORY", Context.MODE_PRIVATE)
     }
 
+    single {
+        Room.databaseBuilder(androidContext(), AppDatabase::class.java, "database.db")
+            .fallbackToDestructiveMigration(false)
+            .build()
+    }
+
     factory { Gson() }
 
     single<SearchHistoryRepository> {
-        SearchHistoryRepositoryImpl(get(),get())
+        SearchHistoryRepositoryImpl(get(),get(), get())
+    }
+
+    single<FavoriteRepository>{
+        FavoriteRepositoryImpl(get(),get())
     }
 
     single<NetworkClient> {
@@ -46,5 +60,6 @@ val dataModule = module {
     }
 
     factory { MediaPlayer() }
+
 }
 

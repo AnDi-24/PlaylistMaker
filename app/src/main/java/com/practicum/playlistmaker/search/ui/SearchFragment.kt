@@ -64,7 +64,10 @@ class SearchFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        onTrackClickDebounce = debounce<Track>(CLICK_DEBOUNCE_DELAY, viewLifecycleOwner.lifecycleScope, false) { track ->
+        onTrackClickDebounce = debounce<Track>(
+            CLICK_DEBOUNCE_DELAY,
+            viewLifecycleOwner.lifecycleScope,
+            false) { track ->
             viewModel.saveTrackFromListener(track)
             val chosenTrackToString = Json.encodeToString(track)
             findNavController().navigate(R.id.action_searchFragment_to_playerFragment,
@@ -73,9 +76,7 @@ class SearchFragment : Fragment() {
 
         val inputMethodManager = requireActivity().getSystemService(INPUT_METHOD_SERVICE) as? InputMethodManager
 
-        historyAdapter.savedList =
-            viewModel.getTrackListFromPref() ?: emptyList<Track>().toMutableList()
-
+        historyAdapter.savedList = viewModel.getTrackListFromPref() ?: emptyList<Track>().toMutableList()
 
         playerIntent = Intent(requireContext(), PlayerFragment::class.java)
 
@@ -144,7 +145,6 @@ class SearchFragment : Fragment() {
                     placeholderNotFound.visibility = View.GONE
                     refreshButton.visibility = View.GONE
                 }
-
             }
         })
 
@@ -157,6 +157,12 @@ class SearchFragment : Fragment() {
         textWatcher?.let { binding.inputEditText.removeTextChangedListener(it) }
         viewModel.saveHistoryFromAdapter(historyAdapter.savedList)
         _binding = null
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val query = binding.inputEditText.text.toString()
+        viewModel.requestState(query)
     }
 
     private fun clearButtonVisibility(s: CharSequence?): Int {
@@ -220,12 +226,20 @@ class SearchFragment : Fragment() {
     }
 
     fun historyActions(track: Track) {
-        historyAdapter.savedList.remove(track)
-        historyAdapter.notifyDataSetChanged()
-        historyAdapter.savedList.add(0, track)
-        historyAdapter.notifyDataSetChanged()
-        viewModel.cleanHistory(historyAdapter.savedList.size)
-        historyAdapter.notifyDataSetChanged()
+
+        val trackId = track.trackId
+        val isTrackExists = historyAdapter.savedList.any { it.trackId == trackId }
+
+        if (!isTrackExists) {
+            historyAdapter.savedList.add(0, track)
+            viewModel.cleanHistory(historyAdapter.savedList.size)
+            historyAdapter.notifyDataSetChanged()
+        } else {
+            historyAdapter.savedList.removeIf { it.trackId == trackId }
+            historyAdapter.savedList.add(0, track)
+            viewModel.cleanHistory(historyAdapter.savedList.size)
+            historyAdapter.notifyDataSetChanged()
+        }
     }
 
     fun render(state: SearchState) {
@@ -250,4 +264,3 @@ class SearchFragment : Fragment() {
         private const val INPUT_DEF = ""
     }
 }
-

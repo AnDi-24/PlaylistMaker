@@ -6,6 +6,10 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class TrackDto(
+
+    @SerializedName("trackId")
+    val trackId: String,
+
     @SerializedName("artistName")
     val artistName: String,
 

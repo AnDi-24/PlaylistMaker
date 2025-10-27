@@ -5,6 +5,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.appcompat.content.res.AppCompatResources.getDrawable
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -25,7 +27,6 @@ class PlayerFragment : Fragment() {
 
     private var _binding: FragmentPlayerBinding? = null
     private val binding get() = _binding!!
-
     private val viewModel: PlayerViewModel by viewModel()
 
     override fun onCreateView(
@@ -42,8 +43,10 @@ class PlayerFragment : Fragment() {
 
         val chosenTrack: Track = Json.decodeFromString(requireArguments().getSerializable("chosen_Track_Key").toString())
 
+        bind(chosenTrack)
+
         val viewModel: PlayerViewModel by viewModel { (
-                parametersOf(chosenTrack.previewUrl)) }
+                parametersOf(chosenTrack)) }
 
         viewModel.observePlayer().observe(viewLifecycleOwner){
             if (it.playerState == PlayerStates.PLAYING){
@@ -74,6 +77,10 @@ class PlayerFragment : Fragment() {
         }
 
         viewModel.observePlayer().observe(viewLifecycleOwner){
+            likeCheck(it.isFavorite)
+        }
+
+        viewModel.observePlayer().observe(viewLifecycleOwner){
             binding.progress.text = it.timer
         }
 
@@ -85,16 +92,28 @@ class PlayerFragment : Fragment() {
             viewModel.playbackControl()
         }
 
-        bind(chosenTrack)
-
         binding.backButton.setOnClickListener {
             findNavController().navigateUp()
+        }
+
+        binding.likeButton.setOnClickListener {
+            viewModel.onFavoriteClicked(chosenTrack)
+            if (chosenTrack.isFavorite){
+                Toast.makeText(context,
+                    R.string.add_to_favorite,
+                    Toast.LENGTH_SHORT).show()
+            }else{
+                Toast.makeText(context,
+                    R.string.remove_from_favorite,
+                    Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
     override fun onPause() {
         super.onPause()
         viewModel.pausePlayer()
+
     }
 
     override fun onDestroyView() {
@@ -119,6 +138,29 @@ class PlayerFragment : Fragment() {
             durationTime.text = formatter.format(item.trackTimeMillis.toLong())
             albumName.text = item.collectionName
             progress.text = getString(R.string.time_example)
+            if(item.isFavorite){
+                likeButton.setImageDrawable(getDrawable(
+                    requireContext(),
+                    R.drawable.like))
+            }else{
+                likeButton.setImageDrawable(getDrawable(
+                    requireContext(),
+                    R.drawable.unlike))
+            }
+        }
+    }
+
+    fun likeCheck(item: Boolean){
+        binding.apply{
+            if(item){
+                likeButton.setImageDrawable(getDrawable(
+                        requireContext(),
+                        R.drawable.like))
+            }else{
+                likeButton.setImageDrawable(getDrawable(
+                    requireContext(),
+                    R.drawable.unlike))
+            }
         }
     }
 
