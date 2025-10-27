@@ -3,7 +3,7 @@
     android:shape="rectangle">
 
     <stroke
-        android:color="@color/edit_text_frame"
+        android:color="@color/edit_text_frame_focus"
         android:width="2dp"/>
 
     <corners android:radius="8dp"/>

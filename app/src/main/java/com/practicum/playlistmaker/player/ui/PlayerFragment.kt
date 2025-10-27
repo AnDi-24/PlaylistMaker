@@ -132,6 +132,7 @@ class PlayerFragment : Fragment() {
         }
 
         binding.addButton.setOnClickListener {
+            bottomSheetBehavior.peekHeight = 1400
             bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
         }
 

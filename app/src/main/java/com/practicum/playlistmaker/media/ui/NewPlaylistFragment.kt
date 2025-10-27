@@ -12,6 +12,7 @@ import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -64,12 +65,29 @@ class NewPlaylistFragment: Fragment() {
             pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
         }
 
+        binding.inputTitle.setOnFocusChangeListener { view, hasFocus ->
+            if (hasFocus) {
+                binding.titleMini.setTextColor(ContextCompat.getColor(requireContext(), R.color.bg_blue))
+            } else {
+                binding.titleMini.setTextColor(ContextCompat.getColor(requireContext(), R.color.edit_text_frame_focus))
+            }
+        }
+
+        binding.inputDescription.setOnFocusChangeListener { view, hasFocus ->
+            if (hasFocus) {
+                binding.descriptionMini.setTextColor(ContextCompat.getColor(requireContext(), R.color.bg_blue))
+            } else {
+                binding.descriptionMini.setTextColor(ContextCompat.getColor(requireContext(), R.color.edit_text_frame_focus))
+            }
+        }
+
+
         binding.inputTitle.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
 
-                if ((binding.inputTitle.hasFocus() || binding.inputDescription.hasFocus()) && s?.isEmpty() == false) {
+                if ((binding.inputTitle.hasFocus()) && s?.isEmpty() == false) {
                     binding.titleMini.isVisible = true
                     binding.descriptionMini.isVisible = true
                     binding.inputDescription.hint = ""
@@ -94,12 +112,11 @@ class NewPlaylistFragment: Fragment() {
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
 
-                if ((binding.inputTitle.hasFocus() || binding.inputDescription.hasFocus()) && s?.isEmpty() == false) {
+                if ((binding.inputDescription.hasFocus()) && s?.isEmpty() == false) {
                     binding.titleMini.isVisible = true
                     binding.descriptionMini.isVisible = true
                     binding.inputTitle.setHint(R.string.necessary)
                 } else {
-                    binding.titleMini.isVisible = false
                     binding.descriptionMini.isVisible = false
                     binding.inputTitle.setHint(R.string.title)
                 }
@@ -108,6 +125,7 @@ class NewPlaylistFragment: Fragment() {
 
             override fun afterTextChanged(s: Editable?) {
                 binding.apply {
+                    binding.inputDescription.setHint(R.string.description)
                 }
             }
         })
