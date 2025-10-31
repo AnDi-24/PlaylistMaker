@@ -2,10 +2,15 @@ package com.practicum.playlistmaker.player.ui
 
 import android.icu.text.SimpleDateFormat
 import android.media.MediaPlayer
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import com.practicum.playlistmaker.media.domain.db.PlaylistInteractor
+import com.practicum.playlistmaker.media.domain.models.Playlist
 import com.practicum.playlistmaker.player.ui.model.PlayerData
 import com.practicum.playlistmaker.player.ui.model.PlayerStates
 import com.practicum.playlistmaker.search.domain.db.FavoriteInteractor
@@ -17,6 +22,7 @@ import java.util.Locale
 
 class PlayerViewModel(private val track: Track,
                       private val mediaPlayer: MediaPlayer,
+                      private val playlistInteractor: PlaylistInteractor,
                       private val favoritesInteractor: FavoriteInteractor)
     : ViewModel() {
 
@@ -25,9 +31,17 @@ class PlayerViewModel(private val track: Track,
     private var timer = "00:00"
     private val playerLiveData = MutableLiveData(PlayerData(PlayerStates.DEFAULT, timer, track.isFavorite))
     fun observePlayer(): LiveData<PlayerData> = playerLiveData
+    private val bottomSheetLiveData = MutableLiveData<List<Playlist>>()
+    var dataList: LiveData<List<Playlist>> = bottomSheetLiveData
+    val gson = Gson()
+
+     var tracksIds: MutableList<String> =  mutableListOf()
+
+
 
     init {
         preparePlayer()
+        interactor()
     }
 
     override fun onCleared() {
@@ -105,6 +119,52 @@ class PlayerViewModel(private val track: Track,
                 playerLiveData.postValue(PlayerData(playerState, getCurrentPlayerPosition(), false))
             }
         }
+    }
+
+    fun compareIds(playlist: Playlist): Boolean{
+
+        tracksIds.addAll(gson.fromJson(playlist.trackIds, object : TypeToken<MutableList<String>>() {}.type))
+
+        var fragmentReact = false
+        if (tracksIds.isEmpty()) {
+            addTrackToPlaylist(playlist)
+            fragmentReact = true
+        } else {
+            if (!tracksIds.contains(track.trackId)) {
+                addTrackToPlaylist(playlist)
+                fragmentReact = true
+            }
+        }
+        return fragmentReact
+    }
+
+    fun interactor(){
+        viewModelScope.launch {
+            playlistInteractor
+                .getAllPlaylists()
+                .collect { playlists ->
+                    bottomSheetLiveData.value = playlists
+//                    tracksIds.clear()
+                    Log.d("MyTag", "Список: $tracksIds")
+                }
+        }
+    }
+
+    fun addTrackToPlaylist(playlist: Playlist){
+        playlistInteractor.saveTrackToPlaylist(track)
+        Log.d("MyTag", "Трэк: $track")
+        interactor()
+        tracksIds.add(track.trackId)
+        Log.d("MyTag", "Список: $tracksIds")
+        val updatedPlaylist = Playlist(
+            playlist.id,
+            playlist.title,
+            playlist.description,
+            playlist.coverImagePath,
+            gson.toJson(tracksIds),
+            tracksIds.size
+        )
+        playlistInteractor.updatePlaylist(updatedPlaylist)
     }
 
     companion object {

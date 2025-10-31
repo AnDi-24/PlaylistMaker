@@ -3,16 +3,14 @@ package com.practicum.playlistmaker
 import android.app.Application
 import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatDelegate
+import com.markodevcic.peko.PermissionRequester
 import com.practicum.playlistmaker.di.dataModule
 import com.practicum.playlistmaker.di.interactorModule
 import com.practicum.playlistmaker.di.repositoryModule
 import com.practicum.playlistmaker.di.viewModelModule
 import com.practicum.playlistmaker.settings.data.impl.THEME_KEY
-import com.practicum.playlistmaker.settings.ui.SettingsViewModel
 import org.koin.android.ext.koin.androidContext
-import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.context.GlobalContext.startKoin
-import kotlin.getValue
 
 class App : Application() {
 
@@ -24,6 +22,8 @@ class App : Application() {
             androidContext(this@App)
             modules(dataModule, repositoryModule, interactorModule, viewModelModule)
         }
+
+        PermissionRequester.initialize(applicationContext)
 
         themePreferences = getSharedPreferences("THEME_CUR", MODE_PRIVATE)
         switchTheme(themePreferences.getBoolean(THEME_KEY, false))
