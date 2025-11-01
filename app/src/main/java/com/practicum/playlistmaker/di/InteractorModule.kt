@@ -54,7 +54,7 @@ val interactorModule = module{
     }
 
     factory<SharingInteractor> {
-        SharingInteractorImpl(androidContext(),get())
+        SharingInteractorImpl(androidContext(),get(), get())
     }
 
     single {
