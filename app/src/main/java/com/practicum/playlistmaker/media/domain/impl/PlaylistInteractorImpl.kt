@@ -5,6 +5,7 @@ import com.practicum.playlistmaker.media.domain.db.PlaylistRepository
 import com.practicum.playlistmaker.media.domain.models.Playlist
 import com.practicum.playlistmaker.search.domain.models.Track
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 class PlaylistInteractorImpl (private val playlistRepository: PlaylistRepository): PlaylistInteractor {
 
@@ -33,6 +34,6 @@ class PlaylistInteractorImpl (private val playlistRepository: PlaylistRepository
     }
 
     override fun getTracks(idList: List<String>): Flow<List<Track>> {
-        return playlistRepository.getTracks(idList)
+        return playlistRepository.getTracks(idList).map { tracks -> tracks.reversed() }
     }
 }

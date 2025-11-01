@@ -56,7 +56,7 @@ class PlayListsFragment: Fragment() {
 
         playlistAdapter.onItemLongClick = { playlist->
             MaterialAlertDialogBuilder(requireContext())
-                .setTitle("Хотите удалить трек?")
+                .setTitle("Хотите удалить плейлист?")
                 .setNegativeButton("Нет", null)
                 .setPositiveButton("Да") { _, _ ->
                     playListsViewModel.deletePlaylist(playlist)

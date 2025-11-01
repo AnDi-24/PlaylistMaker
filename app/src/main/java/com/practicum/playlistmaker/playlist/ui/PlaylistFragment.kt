@@ -1,14 +1,11 @@
 package com.practicum.playlistmaker.playlist.ui
 
-import android.graphics.Rect
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.core.os.bundleOf
-import androidx.core.view.marginBottom
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -18,6 +15,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.practicum.playlistmaker.R
 import com.practicum.playlistmaker.databinding.FragmentPlaylistBinding
 import com.practicum.playlistmaker.media.domain.models.Playlist
+import com.practicum.playlistmaker.media.ui.EditPlaylistFragment
 import com.practicum.playlistmaker.player.ui.PlayerFragment
 import com.practicum.playlistmaker.search.domain.models.Track
 import com.practicum.playlistmaker.search.ui.TrackAdapter
@@ -37,6 +35,8 @@ class PlaylistFragment: Fragment() {
     private lateinit var onTrackClickDebounce: (Track) -> Unit
 
     lateinit var tracksOnPlaylist: List<Track>
+
+    lateinit var currentPlaylist: Playlist
 
     private val trackAdapter = TrackAdapter {
         onTrackClickDebounce(it)
@@ -61,9 +61,7 @@ class PlaylistFragment: Fragment() {
 
         val moreBottomSheetContainer = binding.moreBottomSheet
 
-        val bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetContainer).apply {
-            state = BottomSheetBehavior.STATE_COLLAPSED
-        }
+        val bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetContainer)
 
         val moreBottomSheetBehavior = BottomSheetBehavior.from(moreBottomSheetContainer).apply {
             state = BottomSheetBehavior.STATE_HIDDEN
@@ -88,43 +86,15 @@ class PlaylistFragment: Fragment() {
             override fun onSlide(bottomSheet: View, slideOffset: Float) {}
         })
 
+        binding.more.post {
+            val rootHeight = binding.root.height
+            val moreBottom = binding.more.bottom
+            val offset = (24 * resources.displayMetrics.density).toInt()
 
-//        val metrics = resources.displayMetrics
-//        val screenHeight = metrics.heightPixels
-//        val peekHeightPercentage = 0.30f
-//        val peekHeight = (screenHeight * peekHeightPercentage).toInt()
-
-
-
-
-        binding.share.post {
-            val targetRect = Rect()
-            binding.share.getGlobalVisibleRect(targetRect)
-
-            val rootRect = Rect()
-            binding.root.getGlobalVisibleRect(rootRect)
-
-            val peekHeight = targetRect.bottom - rootRect.top
-
-            bottomSheetBehavior.peekHeight = peekHeight
+            val desiredPeekHeight = rootHeight - moreBottom - offset
+            bottomSheetBehavior.peekHeight = desiredPeekHeight
+            bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
         }
-
-
-
-
-
-
-//        binding.share.post {
-//            val targetRect = Rect()
-//            binding.share.getGlobalVisibleRect(targetRect)
-//
-//            val windowInsets = ViewCompat.getRootWindowInsets(requireActivity().window.decorView)
-//            val systemTop = windowInsets?.getInsets(WindowInsetsCompat.Type.systemBars())?.top ?: 0
-//
-//            val peekHeight = targetRect.bottom - systemTop
-//            Log.d("значение:", "$peekHeight")
-//            bottomSheetBehavior.peekHeight = peekHeight
-//        }
 
 
         viewModel.playlist.observe(viewLifecycleOwner) {
@@ -149,24 +119,35 @@ class PlaylistFragment: Fragment() {
             }
         })
 
-        binding.backButton.setOnClickListener {
-            findNavController().navigateUp()
-        }
-
-        binding.more.setOnClickListener {
-            moreBottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
-        }
-
-        binding.share.setOnClickListener {
-            if(!tracksOnPlaylist.isEmpty()){
-                viewModel.sharePlaylist()
-            }else{
-                MaterialAlertDialogBuilder(requireContext())
-                    .setMessage("В этом плейлисте нет списка треков, которым можно поделиться")
-                    .setNeutralButton("ОК") { dialog, which ->
-                    }
-                    .show()
+        binding.apply {
+            backButton.setOnClickListener {
+                findNavController().navigateUp()
             }
+            more.setOnClickListener {
+                moreBottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+            }
+            share.setOnClickListener {
+                if (share()){
+                    moreBottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+                }
+            }
+            moreShare.setOnClickListener {
+                if (share()){
+                    moreBottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+                }
+            }
+            moreDelete.setOnClickListener {
+                moreBottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+                delete()
+            }
+            moreEdit.setOnClickListener {
+                findNavController().navigate(R.id.action_playlistFragment_to_editPlaylistFragment,
+                    EditPlaylistFragment.createArgs(currentPlaylist.title,
+                        currentPlaylist.description,
+                        currentPlaylist.coverImagePath,
+                        currentPlaylist.id))
+            }
+
         }
 
         trackAdapter.onItemLongClick = { track ->
@@ -184,6 +165,7 @@ class PlaylistFragment: Fragment() {
     }
 
     private fun bind(playlist: Playlist){
+        currentPlaylist = playlist
         Glide.with(this)
             .load(playlist.coverImagePath)
             .placeholder(R.drawable.placeholder)
@@ -208,6 +190,32 @@ class PlaylistFragment: Fragment() {
         }.launchIn(lifecycleScope)
     }
 
+    private fun share(): Boolean{
+        if(!tracksOnPlaylist.isEmpty()){
+            viewModel.sharePlaylist()
+            return false
+        }else{
+            MaterialAlertDialogBuilder(requireContext())
+                .setMessage("В этом плейлисте нет списка треков, которым можно поделиться")
+                .setNeutralButton("ОК") { dialog, which ->
+                }
+                .show()
+        }
+        return true
+    }
+
+    private fun delete(){
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Хотите удалить плейлист?")
+            .setNegativeButton("Отмена", null)
+            .setPositiveButton("Удалить") { _, _ ->
+                viewModel.deletePlaylist()
+                findNavController().navigateUp()
+            }
+            .show()
+        true
+    }
+
     companion object{
 
         private const val CLICK_DEBOUNCE_DELAY = 100L
@@ -216,7 +224,6 @@ class PlaylistFragment: Fragment() {
 
         fun createArgs(playlistId: Int): Bundle =
             bundleOf(ARGS_TRACK to playlistId)
-
     }
 
 }

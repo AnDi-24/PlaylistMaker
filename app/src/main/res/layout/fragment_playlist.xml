@@ -239,7 +239,7 @@
             app:layout_constraintTop_toTopOf="@id/more_edit"
             app:layout_constraintBottom_toBottomOf="@id/more_edit"
             app:layout_constraintStart_toStartOf="@id/more_edit"
-            android:text="редактрировать информацию"
+            android:text="Редактрировать информацию"
             android:textSize="16sp"/>
 
         <ImageView

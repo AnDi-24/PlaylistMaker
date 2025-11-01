@@ -1,5 +1,6 @@
 package com.practicum.playlistmaker.di
 
+import com.practicum.playlistmaker.media.ui.EditPlaylistViewModel
 import com.practicum.playlistmaker.media.ui.FavoriteViewModel
 import com.practicum.playlistmaker.media.ui.NewPlaylistViewModel
 import com.practicum.playlistmaker.media.ui.PlayListsViewModel
@@ -47,6 +48,10 @@ val viewModelModule = module {
 
     viewModel {
         NewPlaylistViewModel(get(), get())
+    }
+
+    viewModel {
+        EditPlaylistViewModel(get (), get())
     }
 
     viewModel {

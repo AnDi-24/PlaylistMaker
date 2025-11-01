@@ -97,9 +97,16 @@ class PlaylistViewModel(
     }
 
     fun sharePlaylist(){
+        var listCount = 1
         val tracksToShare = sharingInteractor.getTracksToShare(getTracks())
-        val content = "${currentPlaylist.title}\n${currentPlaylist.description}\n${getTrackCountString()}\n${tracksToShare.joinToString(separator = "\n"){"${it.title} (${it.track}) ${it.duration}"}}"
+        val content = "${currentPlaylist.title}\n${currentPlaylist.description}\n${getTrackCountString()}\n${tracksToShare.joinToString(separator = "\n"){"${listCount++}. ${it.title} (${it.track}) ${it.duration}"}}"
         sharingInteractor.share(content)
+    }
+
+    fun deletePlaylist(){
+        viewModelScope.launch {
+            playlistInteractor.deletePlaylist(currentPlaylist)
+        }
     }
 
     fun tracksOnPlaylist() {

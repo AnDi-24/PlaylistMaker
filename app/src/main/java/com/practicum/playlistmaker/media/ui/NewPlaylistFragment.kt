@@ -23,17 +23,32 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.io.File
 import kotlin.getValue
 
-class NewPlaylistFragment: Fragment() {
+open class NewPlaylistFragment: Fragment() {
 
-    private val newPlaylistViewModel: NewPlaylistViewModel by viewModel()
-    private var _binding: FragmentNewPlaylistBinding? = null
-    private val binding get() = _binding!!
+    open val viewModel: NewPlaylistViewModel by viewModel()
+    var _binding: FragmentNewPlaylistBinding? = null
+    val binding get() = _binding!!
+
     lateinit var confirmDialog: MaterialAlertDialogBuilder
-    var title: String = INPUT_DEF
-    var description: String = INPUT_DEF
-    var isPictureSelected = false
+    open var title: String = INPUT_DEF
+    open var description: String = INPUT_DEF
+    open var path = INPUT_DEF
+    open var isPictureSelected = false
     lateinit var pic: Uri
-    var path = ""
+
+    var timestamp: Long = 0
+
+    val pickMedia =
+        registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+            if (uri != null) {
+                pic = uri
+                binding.albumPic.setImageURI(uri)
+                isPictureSelected = true
+            } else {
+                isPictureSelected = false
+            }
+        }
+
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -44,24 +59,10 @@ class NewPlaylistFragment: Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val pickMedia =
-            registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-                if (uri != null) {
-                    val filePath = File(
-                        requireActivity().getExternalFilesDir(Environment.DIRECTORY_PICTURES),
-                        "my_album"
-                    )
-                    val file = File(filePath, "cover_$title.jpg")
-                    path = file.absolutePath
-                    pic = uri
-                    binding.albumPic.setImageURI(uri)
-                    isPictureSelected = true
-                } else {
-                    isPictureSelected = false
-                }
-            }
+
 
         binding.albumPic.setOnClickListener {
+            timestamp = System.currentTimeMillis()
             pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
         }
 
@@ -141,15 +142,15 @@ class NewPlaylistFragment: Fragment() {
 
         binding.saveButton.setOnClickListener {
             if (isPictureSelected) {
-                newPlaylistViewModel.saveImageToPrivateStorage(pic, title)
+                viewModel.saveImageToPrivateStorage(pic, timestamp)
                 val filePath = File(
                     requireActivity().getExternalFilesDir(Environment.DIRECTORY_PICTURES),
                     "my_album"
                 )
-                val file = File(filePath, "cover_$title.jpg")
+                val file = File(filePath, "cover_$timestamp.jpg")
                 path = file.absolutePath
             }
-            newPlaylistViewModel.savePlaylist(title, description, path)
+            viewModel.savePlaylist(title, description, path)
             Toast.makeText(
                 context,
                 context?.getString(R.string.playlist) + " " + title + " " + context?.getString(R.string.created),
@@ -199,7 +200,7 @@ class NewPlaylistFragment: Fragment() {
     }
 
     companion object {
-        private const val INPUT_DEF = ""
+        const val INPUT_DEF = ""
     }
 }
 
