@@ -14,6 +14,7 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import com.practicum.playlistmaker.R
 import com.practicum.playlistmaker.databinding.FragmentNewPlaylistBinding
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -25,7 +26,6 @@ class EditPlaylistFragment: NewPlaylistFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        Log.d("Fragment", "onCreateView called in EditPlaylistFragment")
         _binding = FragmentNewPlaylistBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -34,10 +34,10 @@ class EditPlaylistFragment: NewPlaylistFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val args = arguments ?: Bundle()
-        title = args.getString("playlist_title") ?: INPUT_DEF
-        description = args.getString("playlist_description") ?: INPUT_DEF
-        path = args.getString("playlist_cover") ?: INPUT_DEF
-        val id = args.getInt("playlist_id")
+        title = args.getString(ARGS_TITLE) ?: INPUT_DEF
+        description = args.getString(ARGS_DESCRIPTION) ?: INPUT_DEF
+        path = args.getString(ARGS_COVER) ?: INPUT_DEF
+        val id = args.getInt(ARGS_ID)
 
         binding.inputTitle.setText(title)
         binding.inputDescription.setText(description)
@@ -46,8 +46,8 @@ class EditPlaylistFragment: NewPlaylistFragment() {
             pic = path.toUri()
             binding.albumPic.setImageURI(pic)
         }
-        binding.saveButton.text = "Сохранить"
-        binding.header.text ="Редактировать"
+        binding.saveButton.text = getString(R.string.add)
+        binding.header.text = getString(R.string.edit)
 
         binding.saveButton.setOnClickListener {
             lifecycleScope.launch {
@@ -55,14 +55,13 @@ class EditPlaylistFragment: NewPlaylistFragment() {
                     viewModel.saveImageToPrivateStorage(pic, timestamp)
                     val filePath = File(
                         requireActivity().getExternalFilesDir(Environment.DIRECTORY_PICTURES),
-                        "my_album"
-                    )
+                        "my_album")
                     val file = File(filePath, "cover_$timestamp.jpg")
                     path = file.absolutePath
                 }
 
                 viewModel.saveChanges(title, description, path, id)
-                delay(100)
+                delay(DELAY)
                 findNavController().navigateUp()
             }
         }
@@ -79,7 +78,6 @@ class EditPlaylistFragment: NewPlaylistFragment() {
                     findNavController().navigateUp()
             }
         })
-
     }
 
     companion object{
@@ -87,6 +85,8 @@ class EditPlaylistFragment: NewPlaylistFragment() {
         private const val ARGS_DESCRIPTION = "playlist_description"
         private const val ARGS_COVER = "playlist_cover"
         private const val ARGS_ID = "playlist_id"
+
+        private const val DELAY: Long = 500
 
         fun createArgs(playlistTitle: String,
                        playlistDescription: String,

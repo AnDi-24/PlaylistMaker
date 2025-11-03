@@ -16,9 +16,6 @@ class EditPlaylistViewModel(playlistInteractor: PlaylistInteractor,
                     playlistDescription: String,
                     playlistCover: String,
                     playlistId: Int){
-
-
-
         viewModelScope.launch {
             playlistInteractor
                 .getPlaylistById(playlistId)
@@ -32,7 +29,7 @@ class EditPlaylistViewModel(playlistInteractor: PlaylistInteractor,
                                 it.trackIds,
                                 it.tracksCount))
                 }
-            delay(100)
+            delay(200)
             playlistInteractor.updatePlaylist(playlist, "")
 
         }
