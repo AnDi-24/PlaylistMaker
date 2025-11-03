@@ -13,12 +13,11 @@ class PlaylistBottomSheetAdapter (
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PlaylistBottomSheetViewHolder =
         PlaylistBottomSheetViewHolder.from(parent)
 
-
     override fun onBindViewHolder(holder: PlaylistBottomSheetViewHolder, position: Int) {
-        val trackPosition = playlists[position]
-        holder.bind(trackPosition)
+        val playlistPosition = playlists[position]
+        holder.bind(playlistPosition)
         holder.itemView.setOnClickListener {
-            onPlaylistClick.invoke(trackPosition)
+            onPlaylistClick.invoke(playlistPosition)
         }
     }
 

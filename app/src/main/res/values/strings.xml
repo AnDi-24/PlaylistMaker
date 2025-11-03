@@ -23,6 +23,7 @@
         Загрузка не удалась. Проверьте подключение к интернету</string>
     <string name="no_playlists">Вы не создали \n
         ни одного плейлиста</string>
+    <string name="delete_playlist">Хотите удалить плейлист?</string>
     <string name="favorite">Избранные треки</string>
     <string name="playlists">Плейлисты</string>
     <string name="playlist">Плейлист</string>
@@ -45,6 +46,7 @@
     <string name="title">Название*</string>"
     <string name="description">Описание</string>"
     <string name="create">Создать</string>"
+    <string name="edit">Редактировать</string>"
     <string name="created">cоздан</string>"
     <string name="necessary">*Обязательное поле</string>"
     <string name="finished_title">Завершить создание плейлиста?</string>"

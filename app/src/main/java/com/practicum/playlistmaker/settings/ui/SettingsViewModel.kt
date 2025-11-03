@@ -3,6 +3,7 @@ package com.practicum.playlistmaker.settings.ui
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import com.practicum.playlistmaker.App
+import com.practicum.playlistmaker.R
 import com.practicum.playlistmaker.settings.domain.use_case.LoadThemeUseCase
 import com.practicum.playlistmaker.settings.domain.use_case.SaveThemeUseCase
 import com.practicum.playlistmaker.sharing.domain.api.SharingInteractor
@@ -16,7 +17,7 @@ class SettingsViewModel(
 ): ViewModel() {
 
     fun sharingButtonClick(){
-        sharingInteractor.shareApp()
+        sharingInteractor.share(context.getString(R.string.link_share))
     }
 
     fun supportButtonClick(){

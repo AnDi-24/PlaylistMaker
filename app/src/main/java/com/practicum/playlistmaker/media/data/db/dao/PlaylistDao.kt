@@ -1,9 +1,11 @@
 package com.practicum.playlistmaker.media.data.db.dao
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import com.practicum.playlistmaker.media.data.db.entity.PlaylistEntity
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface PlaylistDao {
@@ -23,5 +25,11 @@ interface PlaylistDao {
 
     @Query("SELECT * FROM playlists")
     suspend fun getAllPlaylists(): List<PlaylistEntity>
+
+    @Query("SELECT * FROM playlists WHERE id = :id")
+    suspend fun getPlaylistById(id: Int): PlaylistEntity
+
+    @Delete
+    suspend fun deletePlaylist(playlist: PlaylistEntity)
 
 }
