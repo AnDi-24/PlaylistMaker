@@ -2,7 +2,6 @@ package com.practicum.playlistmaker.player.ui
 
 import android.icu.text.SimpleDateFormat
 import android.media.MediaPlayer
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -36,8 +35,6 @@ class PlayerViewModel(private val track: Track,
     val gson = Gson()
 
      var tracksIds: MutableList<String> =  mutableListOf()
-
-
 
     init {
         preparePlayer()
@@ -123,6 +120,8 @@ class PlayerViewModel(private val track: Track,
 
     fun compareIds(playlist: Playlist): Boolean{
 
+        tracksIds.clear()
+
         tracksIds.addAll(gson.fromJson(playlist.trackIds, object : TypeToken<MutableList<String>>() {}.type))
 
         var fragmentReact = false
@@ -144,18 +143,14 @@ class PlayerViewModel(private val track: Track,
                 .getAllPlaylists()
                 .collect { playlists ->
                     bottomSheetLiveData.value = playlists
-//                    tracksIds.clear()
-                    Log.d("MyTag", "Список: $tracksIds")
                 }
         }
     }
 
     fun addTrackToPlaylist(playlist: Playlist){
         playlistInteractor.saveTrackToPlaylist(track)
-        Log.d("MyTag", "Трэк: $track")
         interactor()
         tracksIds.add(track.trackId)
-        Log.d("MyTag", "Список: $tracksIds")
         val updatedPlaylist = Playlist(
             playlist.id,
             playlist.title,
@@ -164,7 +159,7 @@ class PlayerViewModel(private val track: Track,
             gson.toJson(tracksIds),
             tracksIds.size
         )
-        playlistInteractor.updatePlaylist(updatedPlaylist)
+        playlistInteractor.updatePlaylist(updatedPlaylist, track.trackId)
     }
 
     companion object {
