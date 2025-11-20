@@ -4,6 +4,6 @@ enum class PlayerStates {
     DEFAULT,
     PREPARED,
     PLAYING,
-    PAUSED
-
+    PAUSED,
+    LOADING
 }

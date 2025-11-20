@@ -9,7 +9,6 @@ import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.content.res.AppCompatResources.getDrawable
 import androidx.core.os.bundleOf
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
@@ -72,31 +71,10 @@ class PlayerFragment : Fragment() {
                 parametersOf(chosenTrack)) }
 
         viewModel.observePlayer().observe(viewLifecycleOwner){
-            if (it.playerState == PlayerStates.PLAYING){
-                binding.apply {
-                    playButton.isVisible = false
-                    pauseButton.isVisible = true
-                    pauseButton.isEnabled = true
-                }
-            }
-        }
-
-        viewModel.observePlayer().observe(viewLifecycleOwner){
-            if (it.playerState == PlayerStates.PAUSED){
-                binding.apply {
-                    playButton.isVisible = true
-                    pauseButton.isVisible = false
-                }}
-        }
-
-        viewModel.observePlayer().observe(viewLifecycleOwner){
+            render(it.playerState)
             if (it.playerState == PlayerStates.PREPARED){
                 binding.apply {
-                    playButton.isEnabled = true
-                    playButton.isVisible = true
-                    pauseButton.isVisible = false
-                }
-            }
+                    playButton.endOfPlaying()}}
         }
 
         viewModel.observePlayer().observe(viewLifecycleOwner){
@@ -183,6 +161,28 @@ class PlayerFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         refreshBottomSheet()
+    }
+
+    private fun showLoading() {
+        binding.apply {
+            progressBar.visibility = View.VISIBLE
+            playButton.visibility = View.GONE
+
+        }
+    }
+
+    private fun showPlay() {
+        binding.apply {
+            progressBar.visibility = View.GONE
+            playButton.visibility = View.VISIBLE
+        }
+    }
+
+    private fun render(state: PlayerStates){
+        when(state) {
+            PlayerStates.LOADING -> showLoading()
+            else ->  showPlay()
+        }
     }
 
     fun bind(item: Track){

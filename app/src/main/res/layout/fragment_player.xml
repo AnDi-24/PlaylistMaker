@@ -100,18 +100,28 @@
                     app:layout_constraintStart_toEndOf="@id/left_guideline"
                     app:layout_constraintTop_toBottomOf="@id/artist_name" />
 
-                <ImageButton
+                <com.practicum.playlistmaker.player.ui.PlaybackButtonView
                     android:id="@+id/play_button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@android:color/transparent"
-                    android:contentDescription="@string/play"
-                    android:src="@drawable/play"
+                    android:layout_width="84dp"
+                    android:layout_height="84dp"
+                    app:playButton="@drawable/play"
+                    app:pauseButton="@drawable/pause"
                     app:layout_constraintBottom_toBottomOf="@id/add_button"
                     app:layout_constraintEnd_toStartOf="@+id/like_button"
                     app:layout_constraintStart_toEndOf="@id/add_button"
-                    app:layout_constraintTop_toTopOf="@id/add_button"
-                    android:visibility="visible"/>
+                    app:layout_constraintTop_toTopOf="@id/add_button"/>
+
+                <ProgressBar
+                    android:id="@+id/progressBar"
+                    android:layout_width="84dp"
+                    android:layout_height="84dp"
+                    android:layout_gravity="top|center"
+                    android:indeterminateTint="@color/bg_blue"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="@id/add_button"
+                    app:layout_constraintEnd_toStartOf="@+id/like_button"
+                    app:layout_constraintStart_toEndOf="@id/add_button"
+                    app:layout_constraintTop_toTopOf="@id/add_button"/>
 
                 <ImageButton
                     android:id="@+id/pause_button"
