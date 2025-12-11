@@ -34,6 +34,10 @@ class MusicService: Service(), AudioPlayerControl {
     private val binder = MusicServiceBinder()
 
     private var track: Track? = null
+    private var trackUrl = ""
+    private var trackTitle = ""
+    private var artistName = ""
+
 
     private var mediaPlayer: MediaPlayer? = null
 
@@ -56,8 +60,10 @@ class MusicService: Service(), AudioPlayerControl {
 
     override fun onBind(intent: Intent?): IBinder? {
         if (track == null) {
-            val test = intent?.getSerializableExtra("track_extra").toString()
-            track = Json.decodeFromString(test)
+            track = Json.decodeFromString(intent?.getSerializableExtra("track_extra").toString())
+            trackUrl = track?.previewUrl ?: ""
+            trackTitle = track?.trackName ?: ""
+            artistName = track?.artistName ?: ""
             preparePlayer()
         }
         return binder
@@ -72,7 +78,7 @@ class MusicService: Service(), AudioPlayerControl {
     private fun preparePlayer() {
         _playerData.value = PlayerData(PlayerStates.LOADING, "00:00",
             track?.isFavorite ?: false, true)
-        mediaPlayer?.setDataSource(track?.previewUrl)
+        mediaPlayer?.setDataSource(trackUrl)
         mediaPlayer?.prepareAsync()
         mediaPlayer?.setOnPreparedListener {
             _playerData.value = PlayerData(PlayerStates.PREPARED, "00:00",
@@ -163,7 +169,7 @@ class MusicService: Service(), AudioPlayerControl {
     private fun createNotification(): Notification {
         return NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
             .setContentTitle(getString(R.string.app_name))
-            .setContentText("${track?.artistName} - ${track?.trackName}")
+            .setContentText("$artistName - $trackTitle")
             .setSmallIcon(R.drawable.media)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setCategory(NotificationCompat.CATEGORY_SERVICE)

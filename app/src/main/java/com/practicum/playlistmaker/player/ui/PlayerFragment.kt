@@ -206,9 +206,6 @@ class PlayerFragment : Fragment() {
         _binding = null
         unbindMusicService()
         viewModel.notificationControl(false)
-        Intent(requireContext(), MusicService::class.java).also { intent ->
-            requireContext().stopService(intent)
-        }
     }
 
     override fun onResume() {
