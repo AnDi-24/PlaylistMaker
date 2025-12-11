@@ -38,7 +38,6 @@ class MusicService: Service(), AudioPlayerControl {
     private var trackTitle = ""
     private var artistName = ""
 
-
     private var mediaPlayer: MediaPlayer? = null
 
     inner class MusicServiceBinder : Binder() {
