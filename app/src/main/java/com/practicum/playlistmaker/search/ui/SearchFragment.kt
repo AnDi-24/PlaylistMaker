@@ -2,6 +2,8 @@ package com.practicum.playlistmaker.search.ui
 
 import android.content.Context.INPUT_METHOD_SERVICE
 import android.content.Intent
+import android.content.IntentFilter
+import android.net.ConnectivityManager
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -11,6 +13,7 @@ import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.appcompat.content.res.AppCompatResources.getDrawable
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -19,6 +22,7 @@ import com.practicum.playlistmaker.databinding.FragmentSearchBinding
 import com.practicum.playlistmaker.player.ui.PlayerFragment
 import com.practicum.playlistmaker.search.domain.models.Track
 import com.practicum.playlistmaker.search.ui.model.SearchState
+import com.practicum.playlistmaker.util.ConnectivityChangeBroadcastReceiver
 import com.practicum.playlistmaker.util.debounce
 import kotlinx.serialization.json.Json
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -26,6 +30,7 @@ import kotlin.getValue
 
 class SearchFragment : Fragment() {
 
+    private val connectivityChangeBroadcastReceiver = ConnectivityChangeBroadcastReceiver()
     private var textWatcher: TextWatcher? = null
     private val viewModel by viewModel<SearchViewModel>()
 
@@ -163,6 +168,17 @@ class SearchFragment : Fragment() {
         super.onResume()
         val query = binding.inputEditText.text.toString()
         viewModel.requestState(query)
+        ContextCompat.registerReceiver(
+            requireContext(),
+            connectivityChangeBroadcastReceiver,
+            IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION),
+            ContextCompat.RECEIVER_NOT_EXPORTED
+        )
+    }
+
+    override fun onPause() {
+        super.onPause()
+        requireContext().unregisterReceiver(connectivityChangeBroadcastReceiver)
     }
 
     private fun clearButtonVisibility(s: CharSequence?): Int {

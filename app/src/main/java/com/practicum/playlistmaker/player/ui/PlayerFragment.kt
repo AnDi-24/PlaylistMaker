@@ -1,13 +1,24 @@
 package com.practicum.playlistmaker.player.ui
 
+import android.Manifest
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.content.ServiceConnection
 import android.icu.text.SimpleDateFormat
+import android.net.ConnectivityManager
+import android.os.Build
 import android.os.Bundle
+import android.os.IBinder
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.content.res.AppCompatResources.getDrawable
+import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -18,8 +29,10 @@ import com.practicum.playlistmaker.R
 import com.practicum.playlistmaker.databinding.FragmentPlayerBinding
 import com.practicum.playlistmaker.media.domain.models.Playlist
 import com.practicum.playlistmaker.media.ui.PlaylistBottomSheetAdapter
+import com.practicum.playlistmaker.player.service.MusicService
 import com.practicum.playlistmaker.player.ui.model.PlayerStates
 import com.practicum.playlistmaker.search.domain.models.Track
+import com.practicum.playlistmaker.util.ConnectivityChangeBroadcastReceiver
 import kotlinx.serialization.json.Json
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
@@ -28,6 +41,7 @@ import kotlin.getValue
 
 class PlayerFragment : Fragment() {
 
+    private val connectivityChangeBroadcastReceiver = ConnectivityChangeBroadcastReceiver()
     private var _binding: FragmentPlayerBinding? = null
     private val binding get() = _binding!!
     private val viewModel: PlayerViewModel by viewModel()
@@ -39,6 +53,17 @@ class PlayerFragment : Fragment() {
             hideBottomSheet()
         }else{
             Toast.makeText( context,"Трек уже добавлен в плейлист ${it.title}", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private val serviceConnection = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            val binder = service as MusicService.MusicServiceBinder
+            viewModel.setAudioPlayerControl(binder.getService())
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+            viewModel.removeAudioPlayerControl()
         }
     }
 
@@ -65,6 +90,24 @@ class PlayerFragment : Fragment() {
 
         val chosenTrack: Track = Json.decodeFromString(requireArguments().getSerializable("chosen_Track_Key").toString())
 
+        val serviceTrack = requireArguments().getSerializable("chosen_Track_Key").toString()
+
+        val intent = Intent(requireContext(), MusicService::class.java).apply {
+            putExtra("track_extra", serviceTrack)
+        }
+
+        bindMusicService()
+
+        val requestPermissionLauncher = registerForActivityResult(
+            ActivityResultContracts.RequestPermission()
+        ) { isGranted: Boolean ->
+            if (!isGranted) {
+                Toast.makeText(context,
+                    "Can't start foreground service!",
+                    Toast.LENGTH_SHORT).show()
+            }
+        }
+
         bind(chosenTrack)
 
         val viewModel: PlayerViewModel by viewModel { (
@@ -86,6 +129,11 @@ class PlayerFragment : Fragment() {
         }
 
         binding.playButton.setOnClickListener {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            } else {
+                ContextCompat.startForegroundService(requireContext(), intent)
+            }
             viewModel.playbackControl()
         }
 
@@ -149,18 +197,27 @@ class PlayerFragment : Fragment() {
 
     override fun onPause() {
         super.onPause()
-        viewModel.pausePlayer()
-
+        viewModel.notificationControl(true)
+        requireContext().unregisterReceiver(connectivityChangeBroadcastReceiver)
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+        unbindMusicService()
+        viewModel.notificationControl(false)
     }
 
     override fun onResume() {
         super.onResume()
         refreshBottomSheet()
+        ContextCompat.registerReceiver(
+            requireContext(),
+            connectivityChangeBroadcastReceiver,
+            IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION),
+            ContextCompat.RECEIVER_NOT_EXPORTED
+        )
+        viewModel.notificationControl(false)
     }
 
     private fun showLoading() {
@@ -214,7 +271,6 @@ class PlayerFragment : Fragment() {
         }
     }
 
-
     fun likeCheck(item: Boolean){
         binding.apply{
             if(item){
@@ -241,6 +297,21 @@ class PlayerFragment : Fragment() {
             playlistBottomSheetAdapter.playlists = it as MutableList<Playlist>
             binding.rvPlaylist.adapter?.notifyDataSetChanged()
         }
+    }
+
+    private fun bindMusicService() {
+
+        val serviceTrack = requireArguments().getSerializable("chosen_Track_Key").toString()
+        Intent(requireContext(), MusicService::class.java).apply {
+            putExtra("track_extra", serviceTrack)
+        }.also { intent ->
+            requireContext().bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
+        }
+
+    }
+
+    private fun unbindMusicService() {
+        requireContext().unbindService(serviceConnection)
     }
 
     companion object{

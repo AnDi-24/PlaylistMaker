@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name" translatable="false">Playlist maker</string>
+    <string name="app_name" translatable="false">Playlist Maker</string>
     <string name="yes">Да</string>
     <string name="no">Нет</string>
     <string name="finish">Завершить</string>
