@@ -101,9 +101,7 @@ class PlayerFragment : Fragment() {
         val requestPermissionLauncher = registerForActivityResult(
             ActivityResultContracts.RequestPermission()
         ) { isGranted: Boolean ->
-            if (isGranted) {
-                ContextCompat.startForegroundService(requireContext(), intent)
-            } else {
+            if (!isGranted) {
                 Toast.makeText(context,
                     "Can't start foreground service!",
                     Toast.LENGTH_SHORT).show()
