@@ -10,12 +10,11 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.practicum.playlistmaker.media.domain.db.PlaylistInteractor
 import com.practicum.playlistmaker.media.domain.models.Playlist
+import com.practicum.playlistmaker.player.service.AudioPlayerControl
 import com.practicum.playlistmaker.player.ui.model.PlayerData
 import com.practicum.playlistmaker.player.ui.model.PlayerStates
 import com.practicum.playlistmaker.search.domain.db.FavoriteInteractor
 import com.practicum.playlistmaker.search.domain.models.Track
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.Locale
 
@@ -26,7 +25,7 @@ class PlayerViewModel(private val track: Track,
     : ViewModel() {
 
     private var playerState = PlayerStates.DEFAULT
-    private var timerJob: Job? = null
+    private var audioPlayerControl: AudioPlayerControl? = null
     private var timer = "00:00"
     private val playerLiveData = MutableLiveData(PlayerData(PlayerStates.DEFAULT, timer, track.isFavorite, true))
     fun observePlayer(): LiveData<PlayerData> = playerLiveData
@@ -37,67 +36,45 @@ class PlayerViewModel(private val track: Track,
      var tracksIds: MutableList<String> =  mutableListOf()
 
     init {
-        preparePlayer()
         interactor()
     }
 
     override fun onCleared() {
         super.onCleared()
-        releasePlayer()
+        audioPlayerControl = null
     }
 
-    private fun preparePlayer() {
-        playerLiveData.postValue(PlayerData(PlayerStates.LOADING, "00:00", track.isFavorite, true))
-        mediaPlayer.setDataSource(track.previewUrl)
-        mediaPlayer.prepareAsync()
-        mediaPlayer.setOnPreparedListener {
-            playerState = PlayerStates.PREPARED
-            playerLiveData.postValue(PlayerData(PlayerStates.PREPARED, "00:00", track.isFavorite, false))
-        }
-        mediaPlayer.setOnCompletionListener {
-            timerJob?.cancel()
-            playerState = PlayerStates.PREPARED
-            playerLiveData.postValue(PlayerData(PlayerStates.PREPARED, timer, track.isFavorite, false))
+    fun setAudioPlayerControl(audioPlayerControl: AudioPlayerControl) {
+        this.audioPlayerControl = audioPlayerControl
+
+        viewModelScope.launch {
+            audioPlayerControl.getData().collect {
+                playerLiveData.postValue(it)
+                playerState = it.playerState
+            }
         }
     }
 
-    private fun startPlayer() {
-        mediaPlayer.start()
-        playerState = PlayerStates.PLAYING
-        playerLiveData.postValue(PlayerData(PlayerStates.PLAYING, getCurrentPlayerPosition(), track.isFavorite, false))
-        updateTimer()
-    }
-
-    fun pausePlayer() {
-        mediaPlayer.pause()
-        timerJob?.cancel()
-        playerState = PlayerStates.PAUSED
-        playerLiveData.postValue(PlayerData(PlayerStates.PAUSED, getCurrentPlayerPosition(), track.isFavorite, false))
+    fun notificationControl(show: Boolean){
+        if (show){
+            audioPlayerControl?.showForegroundService()
+        }else{
+            audioPlayerControl?.hideForegroundService()
+        }
     }
 
     fun playbackControl() {
         when(playerState) {
             PlayerStates.PLAYING -> {
-                pausePlayer()
+                audioPlayerControl?.pausePlayer()
             }PlayerStates.PAUSED, PlayerStates.PREPARED -> {
-                startPlayer()
+                audioPlayerControl?.startPlayer()
             }else -> { }
         }
     }
 
-    private fun releasePlayer() {
-        mediaPlayer.stop()
-        mediaPlayer.release()
-        playerState = PlayerStates.DEFAULT
-    }
-
-    private fun updateTimer() {
-        timerJob = viewModelScope.launch {
-            while (mediaPlayer.isPlaying) {
-                delay(DELAY)
-                playerLiveData.postValue(PlayerData(PlayerStates.PLAYING, getCurrentPlayerPosition(), track.isFavorite, false))
-            }
-        }
+    fun removeAudioPlayerControl() {
+        audioPlayerControl = null
     }
 
     private fun getCurrentPlayerPosition(): String {
@@ -109,13 +86,17 @@ class PlayerViewModel(private val track: Track,
             if (!track.isFavorite) {
                 favoritesInteractor.addTrack(track)
                 track.isFavorite = true
-                playerLiveData.postValue(PlayerData(playerState, getCurrentPlayerPosition(), true, false))
-
-
+                playerLiveData.postValue(PlayerData(playerState, getCurrentPlayerPosition(),
+                    isFavorite = true,
+                    isLoading = false
+                ))
             }else{
                 favoritesInteractor.removeTrack(track)
                 track.isFavorite = false
-                playerLiveData.postValue(PlayerData(playerState, getCurrentPlayerPosition(), false, false))
+                playerLiveData.postValue(PlayerData(playerState, getCurrentPlayerPosition(),
+                    isFavorite = false,
+                    isLoading = false
+                ))
             }
         }
     }
@@ -162,9 +143,5 @@ class PlayerViewModel(private val track: Track,
             tracksIds.size
         )
         playlistInteractor.updatePlaylist(updatedPlaylist, track.trackId)
-    }
-
-    companion object {
-        private const val DELAY = 300L
     }
 }

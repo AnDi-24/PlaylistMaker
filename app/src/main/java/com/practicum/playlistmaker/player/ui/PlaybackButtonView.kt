@@ -69,7 +69,7 @@ class PlaybackButtonView @JvmOverloads constructor(
 
     override fun onDraw(canvas: Canvas) {
         buttonState?.let {
-            canvas.drawBitmap(buttonState!!,null,imageRect,null)
+            canvas.drawBitmap(it,null,imageRect,null)
         }
     }
 
