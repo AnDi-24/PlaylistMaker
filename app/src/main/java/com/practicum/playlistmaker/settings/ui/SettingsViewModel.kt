@@ -28,6 +28,9 @@ class SettingsViewModel(
         sharingInteractor.openTerms()
     }
 
+    fun currentTheme(): Boolean = loadThemeUseCase()
+
+
     fun switchTheme(checked: Boolean){
         saveThemeUseCase(checked)
         (context as App).switchTheme(loadThemeUseCase())

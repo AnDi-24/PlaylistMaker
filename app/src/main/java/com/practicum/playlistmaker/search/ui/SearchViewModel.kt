@@ -15,6 +15,8 @@ import com.practicum.playlistmaker.search.domain.use_case.UnregListenerSavedTrac
 import com.practicum.playlistmaker.search.ui.model.SearchState
 import com.practicum.playlistmaker.util.SingleLiveEvent
 import com.practicum.playlistmaker.util.debounce
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class SearchViewModel(
@@ -28,6 +30,9 @@ class SearchViewModel(
 
     private val stateLiveData = MutableLiveData<SearchState>()
     fun observeState(): LiveData<SearchState> = stateLiveData
+
+    private val _state = MutableStateFlow<SearchState>(SearchState.Empty)
+    val state: StateFlow<SearchState> = _state
 
     private val showToast = SingleLiveEvent<String?>()
     fun observeShowToast(): LiveData<String?> = showToast
@@ -118,12 +123,6 @@ class SearchViewModel(
         saveTrackUseCase.execute(track)
     }
 
-    fun cleanHistory(historySize: Int){
-        if (historySize > MAX_HISTORY_SIZE){
-            renderState(
-                SearchState.RemoveAt(MAX_HISTORY_SIZE))}
-    }
-
     fun saveHistoryFromAdapter(historyFromAdapter: MutableList<Track>){
         saveHistory.execute(historyFromAdapter)
     }
@@ -134,6 +133,28 @@ class SearchViewModel(
 
     override fun onCleared(){
         unRegListener.execute()
+    }
+
+    fun loadHistory() {
+        val history = getTrackListFromPref() ?: emptyList()
+        _state.value = SearchState.History(history)
+    }
+
+    fun clearHistory() {
+        saveHistoryFromAdapter(emptyList<Track>().toMutableList())
+    }
+
+    fun addToHistory(track: Track) {
+        saveTrackFromListener(track)
+        val currentHistory = (state.value as? SearchState.History)?.tracks ?: emptyList<Track>().toMutableList()
+        val filteredHistory = currentHistory.filterNot { it.trackId == track.trackId }
+        val newHistory = listOf(track) + filteredHistory
+        val trimmedHistory = if (newHistory.size > MAX_HISTORY_SIZE) {
+            newHistory.take(MAX_HISTORY_SIZE)
+        } else {
+            newHistory
+        }
+        saveHistoryFromAdapter(trimmedHistory.toMutableList())
     }
 
     companion object {

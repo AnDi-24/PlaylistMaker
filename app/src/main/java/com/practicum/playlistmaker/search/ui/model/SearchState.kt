@@ -21,7 +21,6 @@ sealed interface SearchState {
         val track: Track
     ): SearchState
 
-    data class RemoveAt(
-        val position: Int
-    ): SearchState
+    data class History(val tracks: List<Track>) : SearchState
 }
+
