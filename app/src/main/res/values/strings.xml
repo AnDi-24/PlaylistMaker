@@ -1,4 +1,10 @@
 <resources>
+    <plurals name="track_count">
+        <item quantity="one">%d трек</item>
+        <item quantity="few">%d трека</item>
+        <item quantity="many">%d треков</item>
+        <item quantity="other">%d треков</item>
+    </plurals>
     <string name="app_name" translatable="false">Playlist Maker</string>
     <string name="yes">Да</string>
     <string name="no">Нет</string>
@@ -51,6 +57,8 @@
     <string name="necessary">*Обязательное поле</string>"
     <string name="finished_title">Завершить создание плейлиста?</string>"
     <string name="finished_title_message">Все несохраненные данные будут потеряны</string>"
+    <string name="clear_history_button">Очистить историю</string>"
+    <string name="refresh">Обновить</string>"
 
 
 </resources>

@@ -4,41 +4,29 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
-import com.google.android.material.tabs.TabLayoutMediator
-import com.practicum.playlistmaker.R
-import com.practicum.playlistmaker.databinding.FragmentMediaBinding
+import androidx.navigation.fragment.findNavController
+import com.practicum.playlistmaker.settings.ui.SettingsViewModel
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import kotlin.getValue
 
 class MediaFragment : Fragment() {
 
-    private var _binding: FragmentMediaBinding? = null
-    private val binding get() = _binding!!
+    val favViewModel by viewModel<FavoriteViewModel>()
+    val playListsViewModel by viewModel<PlayListsViewModel>()
+    val settingsViewModel by viewModel<SettingsViewModel>()
 
-    private lateinit var tabMediator: TabLayoutMediator
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        return ComposeView(requireContext()).apply {
+            setContent {
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        _binding = FragmentMediaBinding.inflate(inflater, container, false)
-        return binding.root
-    }
+                MediaCompose(favViewModel, playListsViewModel, settingsViewModel, findNavController())
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        binding.viewPager.adapter = PagerAdapter(fragmentManager = childFragmentManager, lifecycle)
-
-        tabMediator = TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
-            when (position) {
-                0 -> tab.text = getString(R.string.favorite)
-                1 -> tab.text = getString(R.string.playlists)
             }
         }
-        tabMediator.attach()
-
     }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
-    }
-
 }
